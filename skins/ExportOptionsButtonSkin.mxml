@@ -1,0 +1,227 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+Copyright (c) 2012 ESRI
+
+All rights reserved under the copyright laws of the United States
+and applicable international laws, treaties, and conventions.
+
+You may freely redistribute and use this sample code, with or
+without modification, provided you include the original copyright
+notice and use restrictions.
+
+See use restrictions in use_restrictions.txt.
+-->
+<!---
+The default skin class for the AttributeTableOptionsButton component.
+<p><b>Since:</b> ArcGIS API 3.1 for Flex</p>
+@private
+-->
+<s:SparkButtonSkin xmlns:fx="http://ns.adobe.com/mxml/2009"
+                   xmlns:s="library://ns.adobe.com/flex/spark"
+                   xmlns:fb="http://ns.adobe.com/flashbuilder/2009"
+                   alpha.disabled="0.5"
+                   minHeight="21"
+                   minWidth="21">
+    <fx:Metadata>
+        <![CDATA[ 
+        /** 
+        * @copy spark.skins.spark.ApplicationSkin#hostComponent
+        */
+        [HostComponent("spark.components.Button")]
+        ]]>
+    </fx:Metadata>
+    
+    <fx:Script fb:purpose="styling">
+        <![CDATA[
+            import spark.components.Group;
+            /* Define the skin elements that should not be colorized.
+            For button, the graphics are colorized but the label is not. */
+            static private const exclusions:Array = [ "labelDisplay", "separatorLine", "menuIcon", "iconImg" ];
+            
+            /**
+             * @private
+             */
+            override public function get colorizeExclusions():Array
+            {
+                return exclusions;
+            }
+            
+            /**
+             * @private
+             */
+            override protected function initializationComplete():void
+            {
+                useChromeColor = true;
+                super.initializationComplete();
+            }
+            
+            /* Define the symbol fill items that should be colored by the "symbolColor" style.*/
+            private static const symbols:Array = [ "separatorLineStroke", "menuIconFill" ];
+            
+            /**
+             * @private
+             */
+            override public function get symbolItems():Array
+            {
+                return symbols;
+            }
+            
+            /**
+             *  @private
+             */
+            override protected function updateDisplayList(unscaledWidth:Number, unscaledHeight:Number):void
+            {
+                var cr:Number = getStyle("cornerRadius");
+                if (cornerRadius != cr)
+                {
+                    cornerRadius = cr;
+                    fill.radiusX = cornerRadius;
+                    lowlight.radiusX = cornerRadius;
+                    highlight.radiusX = cornerRadius;
+                    border.radiusX = cornerRadius;
+                }
+                
+                if (highlightStroke)
+                {
+                    highlightStroke.radiusX = cornerRadius;
+                }
+                
+                super.updateDisplayList(unscaledWidth, unscaledHeight);
+            }
+            
+            private var cornerRadius:Number = 2;
+        ]]>
+    </fx:Script>
+    
+    <!-- states -->
+    <s:states>
+        <s:State name="up"/>
+        <s:State name="over"/>
+        <s:State name="down"/>
+        <s:State name="disabled"/>
+    </s:states>
+    
+    <!-- layer 1: fill -->
+    <!--- @private -->
+    <s:Rect id="fill"
+            left="1" right="1" top="1" bottom="1"
+            radiusX="2">
+        <s:fill>
+            <s:LinearGradient rotation="90">
+                <s:GradientEntry alpha="0.85"
+                                 color="0xFFFFFF"
+                                 color.down="0xAAAAAA"
+                                 color.over="0xBBBDBD"/>
+                <s:GradientEntry alpha="0.85"
+                                 color="0xD8D8D8"
+                                 color.down="0x929496"
+                                 color.over="0x9FA0A1"/>
+            </s:LinearGradient>
+        </s:fill>
+    </s:Rect>
+    
+    <!-- layer 2: fill lowlight -->
+    <!--- @private -->
+    <s:Rect id="lowlight"
+            left="1" right="1" top="1" bottom="1"
+            radiusX="2">
+        <s:fill>
+            <s:LinearGradient rotation="270">
+                <s:GradientEntry alpha="0.0627"
+                                 color="0x000000"
+                                 ratio="0.0"/>
+                <s:GradientEntry alpha="0.0099"
+                                 color="0x000000"
+                                 ratio="0.48"/>
+                <s:GradientEntry alpha="0"
+                                 color="0x000000"
+                                 ratio="0.48001"/>
+            </s:LinearGradient>
+        </s:fill>
+    </s:Rect>
+    
+    <!-- layer 3: fill highlight -->
+    <!--- @private -->
+    <s:Rect id="highlight"
+            left="1" right="1" top="1" bottom="1"
+            radiusX="2">
+        <s:fill>
+            <s:LinearGradient rotation="90">
+                <s:GradientEntry alpha="0.33"
+                                 alpha.down="0.12"
+                                 alpha.over="0.22"
+                                 color="0xFFFFFF"
+                                 ratio="0.0"/>
+                <s:GradientEntry alpha="0.33"
+                                 alpha.down="0.12"
+                                 alpha.over="0.22"
+                                 color="0xFFFFFF"
+                                 ratio="0.48"/>
+                <s:GradientEntry alpha="0"
+                                 color="0xFFFFFF"
+                                 ratio="0.48001"/>
+            </s:LinearGradient>
+        </s:fill>
+    </s:Rect>
+    
+    <!-- layer 4: highlight stroke (all states except down) -->
+    <!--- @private -->
+    <s:Rect id="highlightStroke"
+            left="1" right="1" top="1" bottom="1"
+            excludeFrom="down"
+            radiusX="2">
+        <s:stroke>
+            <s:LinearGradientStroke rotation="90" weight="1">
+                <s:GradientEntry alpha.over="0.22" color="0xFFFFFF"/>
+                <s:GradientEntry alpha.over="0.22" color="0xD8D8D8"/>
+            </s:LinearGradientStroke>
+        </s:stroke>
+    </s:Rect>
+    
+    <!-- layer 5: border - put on top of the fill so it doesn't disappear when scale is less than 1 -->
+    <!--- @private -->
+    <s:Rect id="border"
+            width="69" height="20"
+            left="0" right="0" top="0" bottom="0"
+            radiusX="2">
+        <s:stroke>
+            <s:LinearGradientStroke rotation="90" weight="1">
+                <s:GradientEntry alpha="0.5625"
+                                 alpha.down="0.6375"
+                                 color="0x000000"/>
+                <s:GradientEntry alpha="0.75"
+                                 alpha.down="0.85"
+                                 color="0x000000"/>
+            </s:LinearGradientStroke>
+        </s:stroke>
+    </s:Rect>
+    
+    <!-- layer 6: content -->
+    <s:HGroup left="0" right="0" top="0" bottom="0"
+              paddingBottom="2"
+              paddingLeft="5"
+              paddingRight="5"
+              paddingTop="2"
+              verticalAlign="middle">
+        <s:BitmapImage id="iconImg" smooth="true"
+                       source="@Embed(source='widgets/eSearch/assets/images/i_export.png')"
+                       width="18" height="18"/>
+        <s:Label id="labelDisplay"
+                 maxDisplayedLines="1"
+                 textAlign="center">
+        </s:Label>
+        <s:Spacer width="100%"/>
+        <s:Line id="separatorLine" height="100%">
+            <s:stroke>
+                <s:SolidColorStroke id="separatorLineStroke" color="black"/>
+            </s:stroke>
+        </s:Line>
+        <s:Path id="menuIcon">
+            <s:fill>
+                <s:SolidColor id="menuIconFill" color="black"/>
+            </s:fill>
+            <s:data>M 3.5 7.0 L 0.0 0.0 L 7.0 0.0 L 3.5 7.0</s:data>
+        </s:Path>
+    </s:HGroup>
+    
+</s:SparkButtonSkin>

@@ -354,6 +354,9 @@
             [Bindable] private var BuffValue:String;
             private var RemoveSearchLayersMinMaxScale:Boolean;
             private var pagingAttempts:int = 0;
+            private var eDrawGLFound:Boolean;
+            private var eLocateGLFound:Boolean;
+            private var pointBufferGLFound:Boolean;
 
             //Print DG Properties
             private var dgheaderbgcolor:uint;
@@ -380,8 +383,8 @@
             private var subSelAlpha:Number;
 
             //Build Constants
-            protected const VERSION:String = "3.6.4";
-            protected const BUILDDATE:String = "3/3/2014";
+            protected const VERSION:String = "3.6.5";
+            protected const BUILDDATE:String = "4/3/2014";
 
             //Resources
             [Embed(source="widgets/eSearch/assets/images/i_about.png")]
@@ -548,6 +551,7 @@
                                 drawGraphicsLayer.addEventListener(GraphicEvent.GRAPHIC_ADD, checkeDrawNumGras);
                                 drawGraphicsLayer.addEventListener(GraphicEvent.GRAPHIC_REMOVE, checkeDrawNumGras);
                                 drawGraphicsLayer.addEventListener(GraphicsLayerEvent.GRAPHICS_CLEAR, checkeDrawNumGras);
+                                eDrawGLFound = true;
                             }
                         });
                     }
@@ -566,6 +570,7 @@
                                 locateGraphicsLayer.addEventListener(GraphicEvent.GRAPHIC_ADD, checkeLocateNumGras);
                                 locateGraphicsLayer.addEventListener(GraphicEvent.GRAPHIC_REMOVE, checkeLocateNumGras);
                                 locateGraphicsLayer.addEventListener(GraphicsLayerEvent.GRAPHICS_CLEAR, checkeLocateNumGras);
+                                eLocateGLFound = true;
                             }
                         });
                     }
@@ -584,6 +589,7 @@
                                 bufferGraphicsLayer.addEventListener(GraphicEvent.GRAPHIC_ADD, checkBufferNumGras);
                                 bufferGraphicsLayer.addEventListener(GraphicEvent.GRAPHIC_REMOVE, checkBufferNumGras);
                                 bufferGraphicsLayer.addEventListener(GraphicsLayerEvent.GRAPHICS_CLEAR, checkBufferNumGras);
+                                pointBufferGLFound = true;
                             }
                         });
                     }
@@ -4493,10 +4499,10 @@
                     var graLayAC:ArrayCollection = drawGraphicsLayer.graphicProvider as ArrayCollection;
                     if (graLayAC.length > 1){
                         geom = unionGeoms2(drawGraphicsLayer);
-                        queryFeaturesGraphical(geom, "esriSpatialRelIntersects", configSearchGraphical[(cboLayerGraphical.selectedIndex<0)?0:cboLayerGraphical.selectedIndex]);
+                        processInputs(geom);
                     }else if (graLayAC.length == 1){
                         geom = (graLayAC[0] as Graphic).geometry;
-                        queryFeaturesGraphical(geom, "esriSpatialRelIntersects", configSearchGraphical[(cboLayerGraphical.selectedIndex<0)?0:cboLayerGraphical.selectedIndex]);
+                        processInputs(geom);
                     }else if(drawGraphicsLayer.graphicProvider.length == 0){
                         showStateResults();
                         showMessage(eDrawGraphicsMessage, false);
@@ -4517,10 +4523,10 @@
                     var graLayAC:ArrayCollection = locateGraphicsLayer.graphicProvider as ArrayCollection;
                     if (graLayAC.length > 1){
                         geom = unionGeoms2(locateGraphicsLayer);
-                        queryFeaturesGraphical(geom, "esriSpatialRelIntersects", configSearchGraphical[(cboLayerGraphical.selectedIndex<0)?0:cboLayerGraphical.selectedIndex]);
+                        processInputs(geom);
                     }else if (graLayAC.length == 1){
                         geom = (graLayAC[0] as Graphic).geometry;
-                        queryFeaturesGraphical(geom, "esriSpatialRelIntersects", configSearchGraphical[(cboLayerGraphical.selectedIndex<0)?0:cboLayerGraphical.selectedIndex]);
+                        processInputs(geom);
                     }else if(locateGraphicsLayer.graphicProvider.length == 0){
                         showStateResults();
                         showMessage(eDrawGraphicsMessage, false);
@@ -4528,6 +4534,39 @@
                 }else{
                     showStateResults();
                     showMessage(eDrawGraphicsMessage, false);
+                }
+            }
+            
+            /*
+            * Use the graphic(s) of the eLocate, eDraw, pointBuffer widgets and buffer them if buffering is 
+            * selected and use those to do a graphical search
+            */
+            private function processInputs(geom:Geometry):void
+            {
+                var buffUnit:Number;
+                if(!keepBufferAfterSearch) clearBuffer();
+                if (geom is Polygon && GeometryUtil.polygonSelfIntersecting(geom as Polygon)){
+                    geometryService.simplify([geom], new AsyncResponder(simpResult, null));
+                    function simpResult(item:Object ,spatialRelat:String):void{
+                        var simpGeoms:Array = item as Array;
+                        if(bufferUserGraphic.selected){
+                            buffUnit = GeometryService[configBufferUnits[(cboGraBufferUnit.selectedIndex < 0)?0:cboGraBufferUnit.selectedIndex].name];
+                            bufferGeometries([geom],sReff,[textGraInputBuffer.text],buffUnit,true);
+                        }else{
+                            queryFeaturesGraphical(simpGeoms[0] as Polygon, "esriSpatialRelIntersects", configSearchGraphical[(cboLayerGraphical.selectedIndex < 0)?0:cboLayerGraphical.selectedIndex]);
+                        }
+                    }
+                }else{
+                    //create extent around map point to improve search results
+                    if (geom.type == Geometry.MAPPOINT && addTolerance.selected){
+                        geom = createExtentAroundMapPoint(geom as MapPoint, pointSearchTolerance);
+                    }
+                    if(bufferUserGraphic.selected){
+                        buffUnit = GeometryService[configBufferUnits[(cboGraBufferUnit.selectedIndex < 0)?0:cboGraBufferUnit.selectedIndex].name];
+                        bufferGeometries([geom],sReff,[textGraInputBuffer.text],buffUnit,true);
+                    }else{
+                        queryFeaturesGraphical(geom, "esriSpatialRelIntersects", configSearchGraphical[(cboLayerGraphical.selectedIndex < 0)?0:cboLayerGraphical.selectedIndex]);
+                    }
                 }
             }
 
@@ -4541,10 +4580,10 @@
                     var graLayAC:ArrayCollection = bufferGraphicsLayer.graphicProvider as ArrayCollection;
                     if (graLayAC.length > 1){
                         geom = unionGeoms2(bufferGraphicsLayer);
-                        queryFeaturesGraphical(geom, "esriSpatialRelIntersects", configSearchGraphical[(cboLayerGraphical.selectedIndex<0)?0:cboLayerGraphical.selectedIndex]);
+                        processInputs(geom);
                     }else if (graLayAC.length == 1){
                         geom = (graLayAC[0] as Graphic).geometry;
-                        queryFeaturesGraphical(geom, "esriSpatialRelIntersects", configSearchGraphical[(cboLayerGraphical.selectedIndex<0)?0:cboLayerGraphical.selectedIndex]);
+                        processInputs(geom);
                     }else if(bufferGraphicsLayer.graphicProvider.length == 0){
                         showStateResults();
                         showMessage("There are no graphics availible",false);
@@ -4561,6 +4600,10 @@
             */
             private function checkForeDrawGL(evt:Event):void
             {
+                if(eDrawGLFound){
+                    map.removeEventListener(MapEvent.LAYER_ADD,checkForeDrawGL);
+                    return;
+                }
                 MapUtil.forEachMapLayer(map, function(layer:Layer):void
                 {
                     if(layer.name.toLowerCase() == "draw features"){
@@ -4578,6 +4621,10 @@
             */
             private function checkForeLocateGL(evt:Event):void
             {
+                if(eLocateGLFound){
+                    map.removeEventListener(MapEvent.LAYER_ADD,checkForeLocateGL);
+                    return;
+                }
                 MapUtil.forEachMapLayer(map, function(layer:Layer):void
                 {
                     if(layer.name.toLowerCase() == "elocate features"){
@@ -4623,6 +4670,10 @@
             */
             private function checkForpntBufferGL(evt:Event):void
             {
+                if(pointBufferGLFound){
+                    map.removeEventListener(MapEvent.LAYER_ADD,checkForpntBufferGL);
+                    return;
+                }
                 MapUtil.forEachMapLayer(map, function(layer:Layer):void
                 {
                     if(layer.name.toLowerCase() == "buffer results"){

@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+Copyright (c) 2012 ESRI
+
+All rights reserved under the copyright laws of the United States
+and applicable international laws, treaties, and conventions.
+
+You may freely redistribute and use this sample code, with or
+without modification, provided you include the original copyright
+notice and use restrictions.
+
+See use restrictions in use_restrictions.txt.
+-->
+<!---
+The AttributeTable options menu.
+@private
+-->
+<s:BorderContainer xmlns:fx="http://ns.adobe.com/mxml/2009"
+                   xmlns:s="library://ns.adobe.com/flex/spark"
+                   xmlns:mx="library://ns.adobe.com/flex/mx"
+                   width="160" height="58"
+                   initialize="this_initializeHandler(event)">
+    <fx:Script>
+        <![CDATA[
+            import mx.events.FlexEvent;
+            import mx.managers.PopUpManager;
+            
+            public static const EXPORT_TO_CSV:String = "exportToCSV";
+            public static const EXPORT_TO_TXT:String = "exportToTXT";
+            
+            [Bindable]
+            public var exportCSVText:String;
+            
+            [Bindable]
+            public var exportTXTText:String;
+            
+            private function this_initializeHandler(event:FlexEvent):void
+            {
+                setStyle("backgroundColor", getStyle("contentBackgroundColor"));
+            }
+            
+            private function label_rollOverHandler(event:MouseEvent):void
+            {
+                var label:Label = Label(event.target);
+                label.setStyle("textDecoration", "underline");
+            }
+            
+            private function label_rollOutHandler(event:MouseEvent):void
+            {
+                var label:Label = Label(event.target);
+                label.setStyle("textDecoration", "");
+            }
+            
+            private function exportCSVGroup_clickHandler(event:MouseEvent):void
+            {
+                dispatchEvent(new Event(EXPORT_TO_CSV));
+                remove();
+            }
+            
+            private function exportTXTGroup_clickHandler(event:MouseEvent):void
+            {
+                dispatchEvent(new Event(EXPORT_TO_TXT));
+                remove();
+            }
+
+            public function add(parent:DisplayObject, atX:Number, atY:Number):void
+            {
+                this.x = atX;
+                this.y = atY;
+                PopUpManager.addPopUp(this, parent);
+            }
+            
+            public function remove():void
+            {
+                PopUpManager.removePopUp(this);
+            }
+        ]]>
+    </fx:Script>
+    
+    <s:layout>
+        <s:VerticalLayout gap="8" paddingLeft="10" paddingRight="10" paddingTop="8" paddingBottom="8"/>
+    </s:layout>
+    <s:HGroup id="exportCSVGroup"
+              width="100%"
+              buttonMode="true"
+              click="exportCSVGroup_clickHandler(event)"
+              verticalAlign="middle">
+        <s:Image width="16" source="@Embed(source='widgets/eSearch/assets/images/i_exportcsv.png')"/>
+        <s:Label width="100%"
+                 maxDisplayedLines="1"
+                 rollOut="label_rollOutHandler(event)"
+                 rollOver="label_rollOverHandler(event)"
+                 showTruncationTip="true"
+                 text="{exportCSVText}"/>
+    </s:HGroup>
+    <s:HGroup id="exportTXTGroup"
+              width="100%"
+              buttonMode="true"
+              click="exportTXTGroup_clickHandler(event)"
+              verticalAlign="middle">
+        <s:Image width="16" source="@Embed(source='widgets/eSearch/assets/images/i_exporttxt.png')"/>
+        <s:Label width="100%"
+                 maxDisplayedLines="1"
+                 rollOut="label_rollOutHandler(event)"
+                 rollOver="label_rollOverHandler(event)"
+                 showTruncationTip="true"
+                 text="{exportTXTText}"/>
+    </s:HGroup>
+</s:BorderContainer>

@@ -14,7 +14,9 @@
                            creationComplete="init()" 
                            cornerRadius="6"
                            skinClass="widgets.eSearch.skins.ResizeTitleWindowSkin"
-                           titleIcon="@Embed('widgets/eSearch/assets/images/i_relate2.png')">
+                           titleIcon="@Embed('widgets/eSearch/assets/images/i_relate2.png')"
+                           resize="resizetitlewindow1_resizeHandler(event)"
+                           move="resizetitlewindow1_moveHandler(event)">
     <Search:layout>
         <s:VerticalLayout horizontalAlign="center" verticalAlign="middle" />
     </Search:layout>
@@ -41,6 +43,8 @@
             import mx.collections.IViewCursor;
             import mx.controls.Alert;
             import mx.core.FlexGlobals;
+            import mx.events.MoveEvent;
+            import mx.events.ResizeEvent;
             import mx.managers.PopUpManager;
             import mx.rpc.AsyncResponder;
             import mx.rpc.Fault;
@@ -56,6 +60,7 @@
             import spark.formatters.NumberFormatter;
             
             import widgets.eSearch.skins.DataGridSkin;
+            import widgets.eSearch.skins.ExportOptionsButtonSkin;
             import widgets.eSearch.utils.PrintProperties;
             import widgets.eSearch.utils.PrintUtil;
         
@@ -103,6 +108,8 @@
             
             private var _zoomScale:Number = 5000;
             private var _zoomPercent:Number = 1.2;
+            
+            private var isEportMenuVisible:Boolean;
             
             public function set zoomScale(value:Number):void
             {
@@ -393,37 +400,6 @@
             public function set dgFieldAliases(value:Object):void
             {
                 _dgFieldAliases = value;
-            }
-            
-            private function exportTo(event:Event):void
-            {
-                try{
-                    var data:String;
-                    var defaultFileName:String;
-                    var os:String = flash.system.Capabilities.os.substr(0, 3);
-                    if(optiongroup.selectedValue == _exp2csvBtnLbl){
-                        if (os == "Win") {
-                            data = exportCSV(resultsGrid,_csvSep,"\r\n",columnIndexes);
-                        }else{
-                            data = exportCSV(resultsGrid,_csvSep,"\n",columnIndexes);
-                        }
-                        defaultFileName = _csvName + ".csv";
-                    }else{
-                        if (os == "Win") {
-                            data = exportTXT(resultsGrid,"\r\n",columnIndexes);
-                        }else{
-                            data = exportTXT(resultsGrid,"\n",columnIndexes);
-                        }
-                        defaultFileName = _csvName + ".txt";
-                    }
-                    
-                    var fileReference:FileReference = new FileReference();
-                    fileReference.save(data,defaultFileName);
-                }
-                catch(error:Error)
-                {
-                    Alert.show(error.message);
-                }
             }
             
             private function msToDate(ms:Number, dateFormat:String, useUTC:Boolean):String
@@ -1006,6 +982,8 @@
             {
                 _resultsGrid = resultsGrid;
                 resultsGrid.moduleFactory = null;
+                optionsMenu.addEventListener(ExportOptionMenu.EXPORT_TO_CSV, exportToCSV);
+                optionsMenu.addEventListener(ExportOptionMenu.EXPORT_TO_TXT, exportToTXT);
             }
             
             public function get datagrid():DataGrid
@@ -1177,10 +1155,91 @@
                     Alert.show(event.faultString);
                 }
             }
+            
+            protected function exportOptions_clickHandler(event:MouseEvent):void
+            {
+                if (!isEportMenuVisible)
+                {
+                    var originPoint:Point = new Point(exportOptions.x, exportOptions.y);
+                    originPoint.y += (resultsGrid.height - exportOptions.height) - 1;
+                    originPoint.x -= (optionsMenu.width - exportOptions.width);
+                    var globalPoint:Point = localToGlobal(originPoint);
+                    optionsMenu.add(this, globalPoint.x, globalPoint.y);
+                }
+                else
+                {
+                    optionsMenu.remove();
+                }
+            }
+            
+            protected function exportToCSV(event:Event):void
+            {
+                try{
+                    var data:String;
+                    var defaultFileName:String;
+                    var os:String = flash.system.Capabilities.os.substr(0, 3);
+                    if (os == "Win") {
+                        data = exportCSV(resultsGrid,_csvSep,"\r\n",columnIndexes);
+                    }else{
+                        data = exportCSV(resultsGrid,_csvSep,"\n",columnIndexes);
+                    }
+                    defaultFileName = _csvName + ".csv";
+                    
+                    var fileReference:FileReference = new FileReference();
+                    fileReference.save(data, defaultFileName);
+                }
+                catch(error:Error){
+                    Alert.show(error.message);
+                }
+            }
+            
+            protected function exportToTXT(event:Event):void
+            {
+                try{
+                    var data:String;
+                    var defaultFileName:String;
+                    var os:String = flash.system.Capabilities.os.substr(0, 3);
+                    if (os == "Win") {
+                        data = exportTXT(resultsGrid,"\r\n",columnIndexes);
+                    }else{
+                        data = exportTXT(resultsGrid,"\n",columnIndexes);
+                    }
+                    defaultFileName = _csvName + ".txt";
+                    
+                    var fileReference:FileReference = new FileReference();
+                    fileReference.save(data, defaultFileName);
+                }
+                catch(error:Error){
+                    Alert.show(error.message);
+                }
+            }
+            
+            private function optionsMenu_addedToStageHandler(event:Event):void
+            {
+                isEportMenuVisible = true;
+            }
+            
+            private function optionsMenu_removedFromStageHandler(event:Event):void
+            {
+                isEportMenuVisible = false;
+            }
+            
+            protected function resizetitlewindow1_resizeHandler(event:ResizeEvent):void
+            {
+                if(isEportMenuVisible) optionsMenu.remove();
+            }
+            
+            protected function resizetitlewindow1_moveHandler(event:MoveEvent):void
+            {
+                if(isEportMenuVisible) optionsMenu.remove();
+            }
         ]]>
     </fx:Script>
     <fx:Declarations>
-        <s:RadioButtonGroup id="optiongroup"/>
+        <Search:ExportOptionMenu id="optionsMenu" exportCSVText="{_exp2csvBtnLbl}" exportTXTText="{_exp2txtBtnLbl}"
+                                 addedToStage="optionsMenu_addedToStageHandler(event)"
+                                 removedFromStage="optionsMenu_removedFromStageHandler(event)"
+                                 rollOut="{optionsMenu.remove()}" />
     </fx:Declarations>
     <s:DataGrid id="resultsGrid" height="100%" width="100%"
                 skinClass="widgets.eSearch.skins.DataGridSkin"
@@ -1191,16 +1250,17 @@
                 gridClick="rclickRow(event)"
                 updateComplete="dataGridResizeHandler(event)"/>
     <Search:controlBarContent>
-        <s:HGroup verticalAlign="middle" paddingLeft="4" >
-            <s:Label id="lblSum" text="{_labelSum}" visible="{sumVisible}" includeInLayout="{sumVisible}"/>
-            <s:TextArea id="taSum" heightInLines="1" editable="false" borderVisible="false" visible="{sumVisible}" includeInLayout="{sumVisible}"/>
-            <s:RadioButton label="{_exp2csvBtnLbl}" groupName="optiongroup" selected="true" visible="{_enableExport}" includeInLayout="{_enableExport}"/>
-            <s:RadioButton label="{_exp2txtBtnLbl}" groupName="optiongroup" visible="{_enableExport}" includeInLayout="{_enableExport}"/>
-            <s:Button id="Export" height="24" label="{_exportButtonLbl}" click="exportTo(event)" skinClass="widgets.eSearch.skins.ExportButtonSkin" visible="{_enableExport}" includeInLayout="{_enableExport}"/>
-            <s:Button id="PrintDDGBtn" height="24" label="{_labelPrint}" click="PrintDDGBtn_clickHandler(event)" skinClass="widgets.eSearch.skins.PrintButtonSkin" visible="{_enablePrint}" includeInLayout="{_enablePrint}"/>
-        </s:HGroup>
+        <s:Spacer width="100%"/>
+        <s:Label id="lblSum" text="{_labelSum}" visible="{sumVisible}" includeInLayout="{sumVisible}"/>
+        <s:TextArea id="taSum" heightInLines="1" editable="false" borderVisible="false" visible="{sumVisible}" includeInLayout="{sumVisible}"/>
+        <s:Button id="exportOptions" height="24"
+                  click="exportOptions_clickHandler(event)"
+                  label="{_exportButtonLbl}"
+                  skinClass="widgets.eSearch.skins.ExportOptionsButtonSkin"
+                  visible="{_enableExport}" includeInLayout="{_enableExport}"/>
+        <s:Button id="PrintDDGBtn" height="24" label="{_labelPrint}" click="PrintDDGBtn_clickHandler(event)" skinClass="widgets.eSearch.skins.PrintButtonSkin" visible="{_enablePrint}" includeInLayout="{_enablePrint}"/>
     </Search:controlBarContent>
     <Search:controlBarLayout>
-        <s:HorizontalLayout horizontalAlign="right" paddingTop="3" paddingBottom="2" paddingRight="5" clipAndEnableScrolling="true" />
+        <s:HorizontalLayout verticalAlign="middle" paddingTop="3" paddingBottom="2" paddingRight="5" clipAndEnableScrolling="true" />
     </Search:controlBarLayout>
 </Search:ResizeTitleWindow>

@@ -8,8 +8,16 @@
                    widgetConfigLoaded="init()" verticalScrollPolicy="off">    
     
     <fx:Declarations>
-        <s:Move id="panelOut" yTo="0" duration="0" startDelay="0" />
-        <s:Move id="panelIn" yTo="175" duration="2000" startDelay="0" />
+        <s:Move id="panelOut" yTo="0" duration="0" startDelay="0"/>
+        <s:Move id="panelIn" yTo="175" duration="2000" startDelay="0"/>
+        <Search:ExportOptionMenu id="optionsMenu" exportCSVText="{_exp2csvBtnLbl}" exportTXTText="{_exp2txtBtnLbl}"
+                                 addedToStage="optionsMenu_addedToStageHandler(event)"
+                                 removedFromStage="optionsMenu_removedFromStageHandler(event)"
+                                 rollOut="{optionsMenu.remove()}" />
+        <Search:ExportOptionMenu id="roptionsMenu" exportCSVText="{_exp2csvBtnLbl}" exportTXTText="{_exp2txtBtnLbl}"
+                                 addedToStage="roptionsMenu_addedToStageHandler(event)"
+                                 removedFromStage="roptionsMenu_removedFromStageHandler(event)"
+                                 rollOut="{roptionsMenu.remove()}" />
     </fx:Declarations>
     
     <fx:Script>
@@ -53,6 +61,7 @@
             import spark.components.gridClasses.GridColumn;
             import spark.events.GridEvent;
             import spark.events.GridSelectionEvent;
+            import spark.events.IndexChangeEvent;
             import spark.formatters.CurrencyFormatter;
             import spark.formatters.DateTimeFormatter;
             import spark.formatters.NumberFormatter;
@@ -163,6 +172,9 @@
             private var sumColumn:GridColumn;
             private var rsumColumn:GridColumn;
             
+            private var isEportMenuVisible:Boolean;
+            private var isrEportMenuVisible:Boolean;
+            
             [Bindable] private var _subselcolor:uint;
             [Bindable] private var _subselectiontextcolor:uint;
             
@@ -193,6 +205,11 @@
                 }
                 AppEvent.addListener(AppEvent.DATA_PUBLISH, sharedDataUpdated);
                 appWidth = FlexGlobals.topLevelApplication.width;
+                optionsMenu.addEventListener(ExportOptionMenu.EXPORT_TO_CSV, exportToCSV);
+                optionsMenu.addEventListener(ExportOptionMenu.EXPORT_TO_TXT, exportToTXT);
+                
+                roptionsMenu.addEventListener(ExportOptionMenu.EXPORT_TO_CSV, exportToCSV);
+                roptionsMenu.addEventListener(ExportOptionMenu.EXPORT_TO_TXT, exportToTXT);
             }
 
             private function addEvent(event:Event):void
@@ -203,9 +220,31 @@
                 panel.addEventListener(MoveEvent.MOVE, panel_moveHandler);
             }
             
+            private function optionsMenu_addedToStageHandler(event:Event):void
+            {
+                isEportMenuVisible = true;
+            }
+            
+            private function optionsMenu_removedFromStageHandler(event:Event):void
+            {
+                isEportMenuVisible = false;
+            }
+            
+            private function roptionsMenu_addedToStageHandler(event:Event):void
+            {
+                isrEportMenuVisible = true;
+            }
+            
+            private function roptionsMenu_removedFromStageHandler(event:Event):void
+            {
+                isrEportMenuVisible = false;
+            }
+            
             /** Close the datagrid when the browser/panel is resized */
             private function resizeEvent(event:ResizeEvent):void
             {
+                if(isEportMenuVisible) optionsMenu.remove();
+                if(isrEportMenuVisible) roptionsMenu.remove();
                 if(panelIsOpen == false){
                     panelIn.end();
                     panelIn.play();
@@ -540,66 +579,6 @@
                     panelIn.target = null;
                     panelOut.target = null;
                     removeEventListener(ResizeEvent.RESIZE, resizeEvent);
-                }
-            }
-
-            private function exportTo(event:Event):void
-            {
-                try{
-                    var data:String;
-                    var defaultFileName:String;
-                    var os:String = flash.system.Capabilities.os.substr(0, 3);
-                    if(optiongroup.selectedValue == _exp2csvBtnLbl){
-                        if (os == "Win") {
-                            data = exportCSV(resultsGrid,_csvSep,"\r\n",columnIndexes);
-                        }else{
-                            data = exportCSV(resultsGrid,_csvSep,"\n",columnIndexes);
-                        }
-                        defaultFileName = _csvName + ".csv";
-                    }else{
-                        if (os == "Win") {
-                            data = exportTXT(resultsGrid,"\r\n",columnIndexes);
-                        }else{
-                            data = exportTXT(resultsGrid,"\n",columnIndexes);
-                        }
-                        defaultFileName = _csvName + ".txt";
-                    }
-                    
-                    var fileReference:FileReference = new FileReference();
-                    fileReference.save(data, defaultFileName);
-                }
-                catch(error:Error){
-                    Alert.show(error.message);
-                }
-            }
-            
-            private function rexportTo(event:Event):void
-            {
-                try{
-                    var data:String;
-                    var defaultFileName:String;
-                    var os:String = flash.system.Capabilities.os.substr(0, 3);
-                    if(roptiongroup.selectedValue == _exp2csvBtnLbl){
-                        if (os == "Win") {
-                            data = exportCSV(relatesGrid,_csvSep, "\r\n", rcolumnIndexes);
-                        }else{
-                            data = exportCSV(relatesGrid,_csvSep, "\n", rcolumnIndexes);
-                        }
-                        defaultFileName = _rcsvName + ".csv";
-                    }else{
-                        if (os == "Win") {
-                            data = exportTXT(relatesGrid, "\r\n", rcolumnIndexes);
-                        }else{
-                            data = exportTXT(relatesGrid, "\n",rcolumnIndexes);
-                        }
-                        defaultFileName = _rcsvName + ".txt";
-                    }
-                    
-                    var fileReference:FileReference = new FileReference();
-                    fileReference.save(data,defaultFileName);
-                }
-                catch(error:Error){
-                    Alert.show(error.message);
                 }
             }
             
@@ -1559,8 +1538,10 @@
             {
                 panelIsOpen = false;
                 movingPanel = true;
-                panelOut.end();
-                panelIn.play();
+                if(isEportMenuVisible == false && isrEportMenuVisible == false){
+                    panelOut.end();
+                    panelIn.play();
+                }
             }
             
             private function panel_rollOverHandler(event:MouseEvent):void
@@ -2127,20 +2108,96 @@
                 resultsGrid.grid.validateNow();
             }
             
+            protected function exportOptions_clickHandler(event:MouseEvent):void
+            {
+                if (!isEportMenuVisible)
+                {
+                    var originPoint:Point = new Point(exportOptions.x + 15, exportOptions.y);
+                    originPoint.y += (optionsMenu.height + exportOptions.height + 24);
+                    var globalPoint:Point = localToGlobal(originPoint);
+                    optionsMenu.add(this, globalPoint.x, globalPoint.y);
+                }
+                else
+                {
+                    optionsMenu.remove();
+                }
+            }
+            
+            protected function exportToCSV(event:Event):void
+            {
+                try{
+                    var which:String = event.target.id;
+                    var data:String;
+                    var defaultFileName:String;
+                    var os:String = flash.system.Capabilities.os.substr(0, 3);
+                    if (os == "Win") {
+                        data = exportCSV((which == "optionsMenu")?resultsGrid:relatesGrid,_csvSep,"\r\n",(which == "optionsMenu")?columnIndexes:rcolumnIndexes);
+                    }else{
+                        data = exportCSV((which == "optionsMenu")?resultsGrid:relatesGrid,_csvSep,"\n",(which == "optionsMenu")?columnIndexes:rcolumnIndexes);
+                    }
+                    defaultFileName = (which == "optionsMenu")?_csvName:_rcsvName + ".csv";
+                    
+                    var fileReference:FileReference = new FileReference();
+                    fileReference.save(data, defaultFileName);
+                }
+                catch(error:Error){
+                    Alert.show(error.message);
+                }
+            }
+            
+            protected function exportToTXT(event:Event):void
+            {
+                try{
+                    var which:String = event.target.id;
+                    var data:String;
+                    var defaultFileName:String;
+                    var os:String = flash.system.Capabilities.os.substr(0, 3);
+                    if (os == "Win") {
+                        data = exportTXT((which == "optionsMenu")?resultsGrid:relatesGrid,"\r\n",(which == "optionsMenu")?columnIndexes:rcolumnIndexes);
+                    }else{
+                        data = exportTXT((which == "optionsMenu")?resultsGrid:relatesGrid,"\n",(which == "optionsMenu")?columnIndexes:rcolumnIndexes);
+                    }
+                    defaultFileName = (which == "optionsMenu")?_csvName:_rcsvName + ".txt";
+                    
+                    var fileReference:FileReference = new FileReference();
+                    fileReference.save(data, defaultFileName);
+                }
+                catch(error:Error){
+                    Alert.show(error.message);
+                }
+            }
+            
+            protected function rexportOptions_clickHandler(event:MouseEvent):void
+            {
+                if (!isrEportMenuVisible)
+                {
+                    var originPoint:Point = new Point(rexportOptions.x -65, rexportOptions.y);
+                    originPoint.y += (roptionsMenu.height + rexportOptions.height + 26);
+                    var globalPoint:Point = localToGlobal(originPoint);
+                    roptionsMenu.add(this, globalPoint.x, globalPoint.y);
+                }
+                else
+                {
+                    roptionsMenu.remove();
+                }
+            }
+            
+            protected function tabs_changeHandler(event:IndexChangeEvent):void
+            {
+                if (isrEportMenuVisible) roptionsMenu.remove();
+                if (isEportMenuVisible) optionsMenu.remove();
+            }
+            
         ]]>
     </fx:Script>
-    <fx:Declarations>
-        <s:RadioButtonGroup id="optiongroup"/>
-        <s:RadioButtonGroup id="roptiongroup"/>
-    </fx:Declarations>
     <s:VGroup gap="-1" height="100%" width="100%" id="panel">
         <s:TabBar id="tabs" dataProvider="{vs}" skinClass="widgets.eSearch.skins.TabBarSkin"
-                  rollOver="panel_rollOverHandler(event)"
+                  rollOver="panel_rollOverHandler(event)" change="tabs_changeHandler(event)"
                   rollOut="panel_rollOutHandler(event)"/>
-        <mx:ViewStack id="vs" height="100%" width="100%" creationPolicy="all"
-                rollOver="panel_rollOverHandler(event)"
-                rollOut="panel_rollOutHandler(event)">
-            <s:NavigatorContent label="{searchResultTab}" width="100%"  height="100%" backgroundColor="{getStyle('chromeColor')}" backgroundAlpha="{getStyle('backgroundAlpha')}">
+        <mx:ViewStack id="vs" height="100%" width="100%" creationPolicy="all">
+            <s:NavigatorContent label="{searchResultTab}" width="100%"  height="100%" backgroundColor="{getStyle('chromeColor')}" backgroundAlpha="{getStyle('backgroundAlpha')}"
+                                rollOver="panel_rollOverHandler(event)"
+                                rollOut="panel_rollOutHandler(event)">
                 <s:SkinnableContainer height="100%" width="100%" backgroundAlpha="{getStyle('backgroundAlpha')}" backgroundColor="{getStyle('chromeColor')}">
                     <s:VGroup gap="0" width="100%" height="100%" horizontalAlign="center" verticalAlign="middle" >
                         <s:DataGrid id="resultsGrid" height="100%" width="100%"
@@ -2159,14 +2216,17 @@
                                      alternatingRowColors="{[getStyle('chromeColor'),getStyle('chromeColor')]}"
                                      selectionMode="multipleRows"
                                      selectionChange="resultsGrid_selectionChangeHandler(event)"/>
-                        <s:HGroup verticalAlign="middle" paddingLeft="4" width="100%" paddingBottom="2" paddingTop="2">
+                        <s:HGroup verticalAlign="middle" paddingLeft="4" width="100%">
                             <s:CheckBox selected="{autoHide}" change="toggleAutoHide()" label="{autoHideLabel}"/>
-                            <s:HGroup verticalAlign="middle" paddingLeft="4" paddingTop="3" paddingBottom="3" paddingRight="30" horizontalAlign="right" height="34" width="100%" visible="{_enableExport || sumVisible || _enablePrint}" includeInLayout="{_enableExport || sumVisible || _enablePrint}">
+                            <s:HGroup verticalAlign="middle" paddingLeft="4" paddingTop="3" paddingBottom="3" paddingRight="30" horizontalAlign="right" height="34" width="100%"
+                                      visible="{_enableExport || sumVisible || _enablePrint}" includeInLayout="{_enableExport || sumVisible || _enablePrint}">
                                 <s:Label id="lblSum" text="{_labelSum}" visible="{sumVisible}" includeInLayout="{sumVisible}"/>
                                 <s:TextArea id="taSum" heightInLines="1" editable="false" borderVisible="false" visible="{sumVisible}" includeInLayout="{sumVisible}"/>
-                                <s:RadioButton label="{_exp2csvBtnLbl}" groupName="optiongroup" selected="true" visible="{_enableExport}" includeInLayout="{_enableExport}"/>
-                                <s:RadioButton label="{_exp2txtBtnLbl}" groupName="optiongroup" visible="{_enableExport}" includeInLayout="{_enableExport}"/>
-                                <s:Button id="Export" height="24" label="{_exportButtonLbl}" click="exportTo(event)" skinClass="widgets.eSearch.skins.ExportButtonSkin" visible="{_enableExport}" includeInLayout="{_enableExport}"/>
+                                <s:Button id="exportOptions" height="24"
+                                          click="exportOptions_clickHandler(event)"
+                                          label="{_exportButtonLbl}"
+                                          skinClass="widgets.eSearch.skins.ExportOptionsButtonSkin"
+                                          visible="{_enableExport}" includeInLayout="{_enableExport}"/>
                                 <s:Button id="PrintDDGBtn" height="24" label="{getDefaultString('printSubmitLabel')}" click="PrintDDGBtn_clickHandler(event)" skinClass="widgets.eSearch.skins.PrintButtonSkin" visible="{_enablePrint}" includeInLayout="{_enablePrint}"/>
                             </s:HGroup>
                         </s:HGroup>
@@ -2174,7 +2234,7 @@
                 </s:SkinnableContainer>
             </s:NavigatorContent>
             <s:NavigatorContent label="{relateResultTab}" width="100%" height="100%" backgroundColor="{getStyle('chromeColor')}" backgroundAlpha="{getStyle('backgroundAlpha')}" maxWidth="{appWidth}"
-                                enabled="{_disableRelateTab}" >
+                                enabled="{_disableRelateTab}" rollOver="panel_rollOverHandler(event)" rollOut="panel_rollOutHandler(event)">
                 <s:SkinnableContainer height="100%" width="100%" backgroundAlpha="{getStyle('backgroundAlpha')}" backgroundColor="{getStyle('chromeColor')}" maxWidth="{appWidth}">
                     <s:VGroup gap="0" height="100%" width="100%" horizontalAlign="center" verticalAlign="middle" maxWidth="{appWidth}">
                         <s:DataGrid id="relatesGrid" height="100%" width="100%"
@@ -2194,9 +2254,11 @@
                                   visible="{_renableExport || rsumVisible || _renablePrint}" includeInLayout="{_renableExport || rsumVisible || _renablePrint}">
                             <s:Label id="rlblSum" text="{_rlabelSum}" visible="{rsumVisible}" includeInLayout="{rsumVisible}"/>
                             <s:TextArea id="rtaSum" heightInLines="1" editable="false" borderVisible="false" visible="{rsumVisible}" includeInLayout="{rsumVisible}"/>
-                            <s:RadioButton label="{_exp2csvBtnLbl}" groupName="roptiongroup" selected="true" visible="{_renableExport}" includeInLayout="{_renableExport}"/>
-                            <s:RadioButton label="{_exp2txtBtnLbl}" groupName="roptiongroup" visible="{_renableExport}" includeInLayout="{_renableExport}"/>
-                            <s:Button id="rExport" height="24" label="{_exportButtonLbl}"  click="rexportTo(event)" skinClass="widgets.eSearch.skins.ExportButtonSkin" visible="{_renableExport}" includeInLayout="{_renableExport}"/>
+                            <s:Button id="rexportOptions"  height="24"
+                                      click="rexportOptions_clickHandler(event)"
+                                      label="{_exportButtonLbl}"
+                                      skinClass="widgets.eSearch.skins.ExportOptionsButtonSkin"
+                                      visible="{_renableExport}" includeInLayout="{_renableExport}"/>
                             <s:Button id="rPrintDDGBtn" height="24" label="{getDefaultString('printSubmitLabel')}" click="rPrintDDGBtn_clickHandler(event)" skinClass="widgets.eSearch.skins.PrintButtonSkin" visible="{_renablePrint}" includeInLayout="{_renablePrint}"/>
                         </s:HGroup>
                     </s:VGroup>

@@ -5,6 +5,10 @@
 [![Image of Enhanced Search Widget](https://raw.github.com/rscheitlin/eSearch/master/Preview.jpg "Example Enhanced Search Widget app")](http://gis.calhouncounty.org/FlexViewer3.1/index.html?config=config-eSearch.xml&esearch=2&slayer=3&exprnum=1)
 
 ## Version Updates
+Version 3.6.5 - 4/3/2014
+* Changed export GUI design to minimize footprint.
+* Added buffer support to eDraw, eLocate and pointBuffer.
+
 Version 3.6.4 - 3/3/2014
 * Fixed issue with field formatting not staying specific to the field it was set for.
 * csv and txt exports now export proper linefeed based on OS.
