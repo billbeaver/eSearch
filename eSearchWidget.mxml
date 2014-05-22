@@ -383,8 +383,8 @@
             private var subSelAlpha:Number;
 
             //Build Constants
-            protected const VERSION:String = "3.6.5";
-            protected const BUILDDATE:String = "4/3/2014";
+            protected const VERSION:String = "3.6.6";
+            protected const BUILDDATE:String = "5/22/2014";
 
             //Resources
             [Embed(source="widgets/eSearch/assets/images/i_about.png")]
@@ -1890,22 +1890,23 @@
                             showMessage(selectionLabel + " " + feats.length, false);
                             msgVisible = true;
                             map.cursorManager.removeBusyCursor();
-                            if(typeQ == "layer"){
-                                if(isNaN(zoomScale)){
-                                    zoomAll();
-                                }else{
-                                    if (map.scale > zoomScale){
-                                        map.scale = zoomScale;
+                            if(searchResultAC.length > 0){
+                                if(typeQ == "layer"){
+                                    if(isNaN(zoomScale)){
+                                        zoomAll();
+                                    }else{
+                                        if (map.scale > zoomScale){
+                                            map.scale = zoomScale;
+                                        }
+                                        map.centerAt(searchResultAC[0].point);
                                     }
-                                    map.centerAt(searchResultAC[0].point);
+                                }
+                                if(ViewerContainer.urlConfigParams.showdatagrid != null){
+                                    if(ViewerContainer.urlConfigParams.showdatagrid == "true" && floatorfixed == "float"){
+                                        showGridResults();
+                                    }
                                 }
                             }
-                            if(ViewerContainer.urlConfigParams.showdatagrid != null){
-                                if(ViewerContainer.urlConfigParams.showdatagrid == "true" && floatorfixed == "float"){
-                                    showGridResults();
-                                }
-                            }
-
                             if(floatorfixed == "fixed"){
                                 var dgConfig:Object = {
                                     widgetTitle: queryPrintTitle,
@@ -2867,6 +2868,7 @@
             * @param Object layerConfig the search layers configuration object
             * @param String initiator a string that specifys if this function was called by the graphical view or the Spatial view
             */
+            private var xThru:int = 0;
             private function queryFeaturesGraphical(geom:Geometry, querySpatialRel:String, layerConfig:Object, initiator:String = "graphical"):void
             {
                 //hide infowindow if any
@@ -3124,6 +3126,10 @@
                         catch (error:Error){
                             map.cursorManager.removeBusyCursor();
                             showMessage(error.message, false);
+                        }
+                        if(xThru == 0){
+                            applyBuffer();
+                            xThru++;
                         }
                     }
 
@@ -3440,6 +3446,7 @@
                             if(isGraphicalBufferOp){
                                 queryFeaturesGraphical(resultEvent, "esriSpatialRelIntersects", configSearchGraphical[(cboLayerGraphical.selectedIndex < 0)?0:cboLayerGraphical.selectedIndex]);
                             }
+                            intersectResults("esriSpatialRelIntersects");
                         }
                         catch (error:Error){
                             showMessage(error.message, false);
@@ -4704,6 +4711,7 @@
             */
             private function clear():void
             {
+                xThru = 0;
                 addSharedData("Deactivate_DrawTool", null); // to be able to deactivate drawTool on other widgets
 
                 //hide infowindow if any

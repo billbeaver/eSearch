@@ -2135,7 +2135,7 @@
                     }else{
                         data = exportCSV((which == "optionsMenu")?resultsGrid:relatesGrid,_csvSep,"\n",(which == "optionsMenu")?columnIndexes:rcolumnIndexes);
                     }
-                    defaultFileName = (which == "optionsMenu")?_csvName:_rcsvName + ".csv";
+                    defaultFileName = (which == "optionsMenu")?_csvName + ".csv":_rcsvName + ".csv";
                     
                     var fileReference:FileReference = new FileReference();
                     fileReference.save(data, defaultFileName);
@@ -2157,7 +2157,7 @@
                     }else{
                         data = exportTXT((which == "optionsMenu")?resultsGrid:relatesGrid,"\n",(which == "optionsMenu")?columnIndexes:rcolumnIndexes);
                     }
-                    defaultFileName = (which == "optionsMenu")?_csvName:_rcsvName + ".txt";
+                    defaultFileName = (which == "optionsMenu")?_csvName + ".txt":_rcsvName + ".txt";
                     
                     var fileReference:FileReference = new FileReference();
                     fileReference.save(data, defaultFileName);
