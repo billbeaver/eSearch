@@ -1177,7 +1177,7 @@
                     if (cArr[2] != "NA"){
                         dgCol.labelFunction = labelFunc;
                     }
-                    if (_dgFieldAliases){
+                    if (_rdgFieldAliases){
                         dgCol.headerText = _rdgFieldAliases[cArr[0]];
                     }
                     if (cArr[1] != "NA"){

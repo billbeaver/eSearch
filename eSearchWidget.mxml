@@ -247,6 +247,7 @@
             private var eDrawGraphicsMessage:String;
             private var nodatagridMessage:String;
             private var bufferMessage:String;
+            [Bindable] private var chooseRealteLabel:String;
 
             //Properties
             private var qFeatSet:FeatureSet;
@@ -383,8 +384,8 @@
             private var subSelAlpha:Number;
 
             //Build Constants
-            protected const VERSION:String = "3.6.6";
-            protected const BUILDDATE:String = "5/22/2014";
+            protected const VERSION:String = "3.6.7";
+            protected const BUILDDATE:String = "5/29/2014";
 
             //Resources
             [Embed(source="widgets/eSearch/assets/images/i_about.png")]
@@ -498,6 +499,7 @@
                     enableAddTollerance = configXML.enableaddtollerance && configXML.enableaddtollerance == "true";
                     enableGraphicsBuffering = configXML.enablegraphicsbuffering && configXML.enablegraphicsbuffering == "true";
                     keepBufferAfterSearch = configXML.keepbufferaftersearch && configXML.keepbufferaftersearch == "true";
+                    chooseRealteLabel = configXML.labels.chooserealtelabel || "Choose the Relate";
 
                     configSpatialSearchRelation = [];
                     var operList:XMLList = configXML..spatialrelationship;
@@ -2868,7 +2870,6 @@
             * @param Object layerConfig the search layers configuration object
             * @param String initiator a string that specifys if this function was called by the graphical view or the Spatial view
             */
-            private var xThru:int = 0;
             private function queryFeaturesGraphical(geom:Geometry, querySpatialRel:String, layerConfig:Object, initiator:String = "graphical"):void
             {
                 //hide infowindow if any
@@ -3126,10 +3127,6 @@
                         catch (error:Error){
                             map.cursorManager.removeBusyCursor();
                             showMessage(error.message, false);
-                        }
-                        if(xThru == 0){
-                            applyBuffer();
-                            xThru++;
                         }
                     }
 
@@ -3446,7 +3443,6 @@
                             if(isGraphicalBufferOp){
                                 queryFeaturesGraphical(resultEvent, "esriSpatialRelIntersects", configSearchGraphical[(cboLayerGraphical.selectedIndex < 0)?0:cboLayerGraphical.selectedIndex]);
                             }
-                            intersectResults("esriSpatialRelIntersects");
                         }
                         catch (error:Error){
                             showMessage(error.message, false);
@@ -4711,11 +4707,15 @@
             */
             private function clear():void
             {
-                xThru = 0;
-                addSharedData("Deactivate_DrawTool", null); // to be able to deactivate drawTool on other widgets
+                //addSharedData("Deactivate_DrawTool", null); // to be able to deactivate drawTool on other widgets
 
                 //hide infowindow if any
                 hideInfoWindow();
+                if(keepGraSearchEnabled == false){
+                    clearSelectionFilter();
+                    lastTool = "";
+                    addSharedData("Deactivate_DrawTool", null); // to be able to deactivate drawTool on other widgets
+                }
 
                 if(currentState == "resultsList"){
                     currentState = lState;
@@ -5056,6 +5056,7 @@
 
                     if(!rWindow){
                         rWindow = new RelatesWindow();
+                        rWindow.title = chooseRealteLabel;
                         rWindow.dProvider = relArrayColl;
                         rWindow.addEventListener("relateClicked", relateChoosen);
                         PopUpManager.addPopUp(rWindow,map,true,PopUpManagerChildList.POPUP);

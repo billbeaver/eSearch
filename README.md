@@ -5,6 +5,11 @@
 [![Image of Enhanced Search Widget](https://raw.github.com/rscheitlin/eSearch/master/Preview.jpg "Example Enhanced Search Widget app")](http://gis.calhouncounty.org/FlexViewer3.1/index.html?config=config-eSearch.xml&esearch=2&slayer=3&exprnum=1)
 
 ## Version Updates
+Version 3.6.7 - 5/29/2014
+* Fixed a few graphical query issues introduced in 3.6.6. 
+* Fixed hyperlinkaliastext not being used with working with related data.
+* Added another localized text option to xml.
+
 Version 3.6.6 - 5/22/2014
 * Fixed URL Query Bug when a search is made and no results are found. 
 * Fixed csv and txt file extension bug in Fixed datagrid export.
