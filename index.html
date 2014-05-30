@@ -1,0 +1,975 @@
+<!doctype html>
+<!-- The Time Machine GitHub pages theme was designed and developed by Jon Rohan, on Feb 7, 2012. -->
+<!-- Follow him for fun. http://twitter.com/jonrohan. Tail his code on http://github.com/jonrohan -->
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+
+  <link rel="stylesheet" href="stylesheets/stylesheet.css" media="screen"/>
+  <link rel="stylesheet" href="stylesheets/pygment_trac.css"/>
+  <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+  <script type="text/javascript" src="javascripts/script.js"></script>
+
+  <title>eSearch</title>
+  <meta name="description" content="Enhanced Search Widget for Flex Viewer">
+
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+
+</head>
+
+<body>
+
+  <div class="wrapper">
+    <header>
+      <h1 class="title">eSearch</h1>
+    </header>
+    <div id="container">
+      <p class="tagline">Enhanced Search Widget for Flex Viewer</p>
+      <div id="main" role="main">
+        <div class="download-bar">
+        <div class="inner">
+          <a href="https://github.com/rscheitlin/eSearch/tarball/master" class="download-button tar"><span>Download</span></a>
+          <a href="https://github.com/rscheitlin/eSearch/zipball/master" class="download-button zip"><span>Download</span></a>
+          <a href="https://github.com/rscheitlin/eSearch" class="code">View eSearch on GitHub</a>
+        </div>
+        <span class="blc"></span><span class="trc"></span>
+        </div>
+        <article class="markdown-body">
+          <h1>
+<a name="enhanced-search-widget" class="anchor" href="#enhanced-search-widget"><span class="octicon octicon-link"></span></a>Enhanced Search Widget</h1>
+
+<p><a href="http://gis.calhouncounty.org/FlexViewer3.1/index.html?config=config-eSearch.xml&amp;esearch=2&amp;slayer=3&amp;exprnum=1">View live app here</a></p>
+
+<p><a href="http://gis.calhouncounty.org/FlexViewer3.1/index.html?config=config-eSearch.xml&amp;esearch=2&amp;slayer=3&amp;exprnum=1"><img src="https://raw.github.com/rscheitlin/eSearch/master/Preview.jpg" alt="Image of Enhanced Search Widget" title="Example Enhanced Search Widget app"></a></p>
+
+<h2>
+<a name="version-updates" class="anchor" href="#version-updates"><span class="octicon octicon-link"></span></a>Version Updates</h2>
+
+<p>Version 3.6.7 - 5/29/2014</p>
+
+<ul>
+<li>Fixed a few graphical query issues introduced in 3.6.6. </li>
+<li>Fixed hyperlinkaliastext not being used with working with related data.</li>
+<li>Added another localized text option to xml.</li>
+</ul><p>Version 3.6.6 - 5/22/2014</p>
+
+<ul>
+<li>Fixed URL Query Bug when a search is made and no results are found. </li>
+<li>Fixed csv and txt file extension bug in Fixed datagrid export.</li>
+</ul><p>Version 3.6.5 - 4/3/2014</p>
+
+<ul>
+<li>Changed export GUI design to minimize footprint.</li>
+<li>Added buffer support to eDraw, eLocate and pointBuffer.</li>
+</ul><p>Version 3.6.4 - 3/3/2014</p>
+
+<ul>
+<li>Fixed issue with field formatting not staying specific to the field it was set for.</li>
+<li>csv and txt exports now export proper linefeed based on OS.</li>
+<li>Added exportnumbersasformattedstrings attribute to enableexport tag. See pdf for explanation.</li>
+<li>Added popuplinktype attribute to link tag. See pdf for explanation.</li>
+</ul><p>Version 3.6.3 - 2/26/2014</p>
+
+<ul>
+<li>Fix major bug with uniquevalsfromfield not returning all records in some cases.</li>
+</ul><p>Version 3.6.2 - 2/20/2014</p>
+
+<ul>
+<li>Fix issue with disableinpopup in datagrids.</li>
+<li>Fix issue with UNC links that have icons specified not working in my popups.</li>
+<li>Fix issue with union geoms function and some multi ring polygons. 
+Special thanks to Leonardo Araújo for the code contribution.</li>
+<li>Added more configurable messages for widget internationalization.</li>
+<li>You can now configure the buffer graphic to remain visible after the search.</li>
+</ul><p>Version 3.6.1 - 12/19/2013</p>
+
+<ul>
+<li>Fixed issue With search layer symbology not showing when using a URL search until a selection was made in the datagrid.</li>
+<li>Unique values from field now honors the layers definition expression.</li>
+</ul><p>Version 3.6 - 12/19/2013</p>
+
+<ul>
+<li>Recompile for ArcGIS Viewer for Flex Version 3.6</li>
+</ul><p>Version 3.5.4 - 11/5/2013</p>
+
+<ul>
+<li>Fixed issue With dropdownlists sizes that was introduce in 3.5.3.</li>
+</ul><p>Version 3.5.3 - 10/22/2013</p>
+
+<ul>
+<li>Fixed issue With preload="minimized" and the dropdownlists.</li>
+<li>Fixed issue with SubTypes and Domains assigned to subtypes.</li>
+<li>Fixed issue with text qualify userlists and the all option.</li>
+</ul><p>Version 3.5.2 - 10/11/2013</p>
+
+<ul>
+<li>Fixed issue hyper link grid fields and version 3.5.1.</li>
+<li>Added ability to text qualify userlists that contain comma in their values.</li>
+</ul><p>Version 3.5.1 - 10/11/2013</p>
+
+<ul>
+<li>Fixed issue with tables and version 3.5.</li>
+</ul><p>Version 3.5 - 10/7/2013</p>
+
+<ul>
+<li>Added sub selection color for subselecting results from he datagrid.</li>
+<li>Fixed Relate error when using fields all="true"</li>
+<li>Fixed issue with choose relate dialog not closing using the X in the upper right corner.</li>
+<li>When buffering during a graphical search, the buffer graphic is now removed after the search is complete.</li>
+</ul><p>Version 3.4 - 7/25/2013</p>
+
+<ul>
+<li>memory leak fix</li>
+<li>Link alias added to photo caption</li>
+<li>Issue with type and coded domains fixed</li>
+<li>Issue with field used as hyperlinkaliastext and not being defined in the field list fixed</li>
+<li>Datagrid autosizing will use the hyperlinkaliastext fields value if larger than the alias text</li>
+</ul><p>Version 3.3.3 - 6/4/2013</p>
+
+<ul>
+<li>Fixed issue where if relate only has one field and it is a hyperlink field the field is added twice and neither is a hyperlink field.</li>
+<li>Fixed issue with zoom and relates</li>
+<li>Better validation of whether the search layer exists in the map and a token is already specified.</li>
+<li>Make 4 additional attempts to get unique values from a field before failing</li>
+</ul><p>Version 3.3.2 - 5/15/2013</p>
+
+<ul>
+<li>Added textqualifier tag for defining the character that will be used in the export datagrid to signify that the
+field contents are a string to programs like Excel®.</li>
+<li>Added removeserchlayersminmaxscale tag that specifies whether or not to remove the
+MinScale and MaxScale of the layer that is set on the particular layer from ArcGIS Server.</li>
+</ul><p>Version 3.3.1 - 5/10/2013</p>
+
+<ul>
+<li>Better error trapping for missing zoomscale on relates</li>
+<li>Add empty strings choice in dropdown for expression from a domain field that is set to isValueRequired false</li>
+<li>Added disable links in popups attribute</li>
+</ul><p>Version 3.3- 5/6/2013</p>
+
+<ul>
+<li>Recompiled for Flex Viewer 3.3</li>
+</ul><p>Version 3.2.3 - 4/30/2013</p>
+
+<ul>
+<li>Added enablemultigraphicssearch</li>
+<li>Added enableincludetextsearch</li>
+<li>Added enableaddtollerance</li>
+<li>Added enablegraphicsbuffering</li>
+<li>Fixed disablelinkifnull issue</li>
+<li>Relate tab name is set to relate label from xml</li>
+<li>Fixed issue using uniquevalsfromfield when only having tables configured</li>
+</ul><p>Version 3.2.2 - 4/3/2013</p>
+
+<ul>
+<li>Fixed bug where selection layer would sometimes show in the layer list/Map switcher widgets with some generic name.</li>
+<li>Fixed issue with table to related features relate datagrid row click or other errors.</li>
+<li>Added support for relates to have a zoomscale or zoompercent just like layers.</li>
+</ul><p>Version 3.2.1 - 4/1/2013</p>
+
+<ul>
+<li>Added back the wait cursor that is displayed when a search is executing.</li>
+<li>Added zoom to supports for row clicks in a related table (if the related data has geometry, both feature to table and table to feature supported).</li>
+</ul><p>Version 3.2 - 3/22/2013</p>
+
+<ul>
+<li>Recompiled for Flex Viewer 3.2</li>
+<li>If hyperlinkaliastext is a field that has a linkprefix and or suffix then do not include the linkprefix and or suffix in the alias text.</li>
+</ul><p>Version 3.1.12 - 3/6/2013</p>
+
+<ul>
+<li>Fix bug where useproxy was not being honored in the UniqueValsfromField.</li>
+<li>Fix spelling of disablelinksifnull attribute.</li>
+<li>Allow hyperlinkaliastext to use a field as well as a hard coded string.</li>
+<li>Allow link alias to use a field as well as a hard coded string.</li>
+</ul><p>Version 3.1.11 - 3/2/20123</p>
+
+<ul>
+<li>Fixed RTE (runtime error) with related data when relate has subtype.</li>
+<li>Graphical search buttons now toggle.</li>
+<li>Applied workaround for Google Chrome datagrid print blank page issue.</li>
+</ul><p>Version 3.1.10 - 2/26/2013</p>
+
+<ul>
+<li>Changed appearance of multiple expressions to have an alternating background color so they are easy to distinguish for one another.</li>
+<li>Fixed potential bug with buffering by adding spatial reference to buffer request.</li>
+<li>Fixed RTE (runtime error) with Apply Buffer before a search is performed.</li>
+<li>Documented useproxy for layers.</li>
+</ul><p>Version 3.1.9 - 2/19/2013</p>
+
+<ul>
+<li>autoopendatagrid is now honored by the fixed datagrid as well as the floating datagrid.</li>
+<li>Drop down lists no longer initalize with no item selected as they did in versions 3.1.7 &amp; 8.</li>
+<li>Handle IN SQL statements in expressions and automatic single quoting of values if expression is expecting strings.</li>
+<li>Fixed escaping of single quotes in user values if more than one exist (i.e. O'Malley and O'Leary Inc).</li>
+<li>Added integration with the Enhanced Locate Widget.</li>
+<li>Fixed issue where widget title button for results was not always selected (shown with underline) when results view was activated.</li>
+</ul><p>Version 3.1.8 - 2/5/2013</p>
+
+<ul>
+<li>Fixed Localization issue with export2csvoptionlabel and export2txtoptionlabel</li>
+<li>Added autosubmit to expression values to allow control over whether a dropdown list automatically fires the search upon selection and textbox when the enter key is pressed. The default is true if this attribute is not used.</li>
+</ul><p>Version 3.1.7 - 1/30/2013</p>
+
+<ul>
+<li>Fixed issue with required fields and dropdownlist executing search before all required fields are completed.</li>
+<li>Re-use a map layer token from the identify manager if the same layer is configured for a search.</li>
+<li>Honor gridfield and gridhyperlinkfield order set in the eSearchWidget.xml (add in order specified).</li>
+</ul><p>Version 3.1.6 - 1/25/2013</p>
+
+<ul>
+<li>Fixed major bug introduced in 3.1.5 with adding and removing form selections</li>
+<li>Fixed bug, when clicking on a popup the datagrid opens.</li>
+<li>Fixed bug when using a hyperlink field in the datagrid with a hyperlinkgridicon specified and error occurs.</li>
+</ul><p>Version 3.1.5 - 1/22/2013</p>
+
+<ul>
+<li>Fixed bug when user does not have ANY layer setup for spatial search.</li>
+<li>Fixed more layer symbology issues.</li>
+<li>Added configuration options for selecting buffer units and distance from xml.</li>
+</ul><p>Version 3.1.4 - 1/15/2013</p>
+
+<ul>
+<li>Fixed a bug when you clear the results and then choose add to results and make a selection.</li>
+</ul><p>Version 3.1.3 - 1/11/2013</p>
+
+<ul>
+<li>Fixed some issues with relates and uniquevalsfromfield when using tokens.</li>
+<li>Fixed some issues if the layers url contains the token.</li>
+</ul><p>Version 3.1.2 - 1/2/2013</p>
+
+<ul>
+<li>When features are added to the selection they appear at the top of the Widgets results list.</li>
+<li>When features are removed the order of the results remains the same minus the removed results.</li>
+</ul><p>Version 3.1.1 - 12/19/2012</p>
+
+<ul>
+<li>Updated some code for API Version 3.1</li>
+<li>Added Token Element to layers and tables</li>
+<li>Fixed some bugs with layer zoom settings.</li>
+<li>Removed geometryservice from eSearchWidget.xml as it gets this from the main config.xml now.</li>
+<li>Added some error trapping to URL Searches using improper parameters</li>
+<li>Changed the URL Search parameter to esearch (was search) as esri is now using search for their
+purposes and it was conflicting with mine.</li>
+</ul><p>Version 3.0.16 - 12/3/2012</p>
+
+<ul>
+<li>Fixed an issue with blanks (when using isrequired="true") and empty strings be treated
+as equal when using uniquevalsfromfield.</li>
+<li>uniquevalsfromfield can now use a datefield and used the dateformat and useutc attributes.</li>
+</ul><p>Version 3.0.15 - 11/28/2012</p>
+
+<ul>
+<li>Fixed an issue when printing after a search and the search layer did not have individual
+layer symbology specified in the eSearchWidget.xml</li>
+<li>Fixed issue where you could not use just tables in the eSearchWidget.xml</li>
+<li>Fixed issue where clicking the clear button before running a search produces an error.</li>
+<li>Fixed issue where new/add/remove selection button is not in the GUI when there is only
+one layer configured.</li>
+<li>Removed the Zoom All button when the results are a table.</li>
+<li>Validate the returned geometry before attempting to zoom to all selected features.</li>
+</ul><p>Version 3.0.14f - 11/15/2012
+** Hot fix for uniquevalsfromfield now are aware of isrequired attribute and add a blank entry
+   in the drop down if necessary.
+** Hot fix for Added support for disabling popups completely for this widget.
+** Hot fix for bug where if more than one uniquevalsfromfield is used in the first expression
+   only one will populate the dropdown.</p>
+
+<p>Version 3.0.14 - 11/14/2012</p>
+
+<ul>
+<li>Fixed bug where if more than one uniquevalsfromfield was used in an expression
+Only one would populate the dropdown.</li>
+<li>uniquevalsfromfield now are aware of isrequired attribute and add a blank entry
+in the drop down if necessary.</li>
+<li>Added delay for mouseover in datagrids to allow user to exit datagrid and choose
+a button from the popup</li>
+<li>The popup shown from the search results and datagrid is the same popup that gets
+displayed when you click on the search graphic on the map.</li>
+<li>Added the ability to add and remove from current selection as well as create a new
+selection (which is the default).</li>
+<li>Fix bug where individual layers symbology specified in the eSearchWidget.xml was
+not being used with certain spatial searches.</li>
+<li>Added support for disabling search widget results (just use result).</li>
+<li>Added support for disabling popups completely for this widget.</li>
+</ul><p>Version 3.0.13 - 10/25/2012</p>
+
+<ul>
+<li>You can now print from the datagrid (floating or fixed). The Print output is properly paginated
+based on the number of columns (and their widths) and the number of rows. The print output has
+several configurable option for header colors, footer elements, etc. The print honors any sort
+applied to the datagrid.</li>
+<li>Export to csv and text now honors the sort applied to the datagrid.</li>
+<li>Fixed bug with resetting required fields when the search is cleared.</li>
+</ul><p>Version 3.0.11 - 10/17/2012</p>
+
+<ul>
+<li>Added uniquevalsfromfield as a source for search drop down (like usedomain and userlist options).</li>
+<li>Changed the default spatialreference in the xml to 102100.</li>
+<li>Fixed bug with spatial search using symbology from first text search layer instead of chosen spatial
+search layer.</li>
+<li>Changed the line width stepper in the GUI to use whole numbers (thanks to Bjorn for point this out).</li>
+</ul><p>Version 3.0.10 - 9/24/2012</p>
+
+<ul>
+<li>Added annimation to buffer graphic properties button.</li>
+<li>Added usesubtype as a source for search drop down (like usedomain option).</li>
+<li>Updated Enhanced Search Widget XML Configuration.pdf to include info on visible property
+of fields element.</li>
+<li>Fixed bug with float datagrid not honoring enable export option in all situations.</li>
+</ul><p>Version 3.0.9 - 9/13/2012</p>
+
+<ul>
+<li>Added an auto sync between the text search layer and the graphical serach layer dropdowns.</li>
+<li>Depreciated the disablerelatestabinfixed attribute infavor of automatically setting the
+visibility of the relates tab for the fixed datagrid based on, if the layer has relates 
+configured or not.</li>
+<li>Fixed datagrid now has configuration options for height and animation duration. Thanks to Kenny Horan</li>
+<li>Added an auto hide checkbox on the fixed datagrid to toggle the auto hide capability.</li>
+<li>Disablelinksifnull attribute now checks for empty strings as well as null values in the link fields.</li>
+</ul><p>Version 3.0.8 - 9/4/2012</p>
+
+<ul>
+<li>Added attribute to not display links that have null values.</li>
+<li>Fixed bug with sorting on joined data.</li>
+<li>Fixed bug with datefomat not being specified throwing error.</li>
+<li>Added a isvaluerequired attribute to expression values and expressions (see documentation for details).</li>
+<li>Added ability to define symbology at the layer level and widget level. </li>
+</ul><p>Version 3.0.7 - 8/21/2012</p>
+
+<ul>
+<li>Tab labels are now configurable in the Fixed data grid (use the SearchWidgetFixedDG.xml).</li>
+<li>Fixed nobufferoutlincolor label being ignored in the eSearchWidget.xml</li>
+<li>Fixed show and hide animation on Fixed Datagrid.</li>
+<li>Fixed datagrid (if autohide) will show when a search is executed and hide with results are cleared.</li>
+<li>If multi field expressions are used, now all fields DO NOT have to be filled.</li>
+<li>Fixed PopUp Attachment Issue.</li>
+</ul><p>Version 3.0.6 - 8/15/2012</p>
+
+<ul>
+<li>Fixed issue with field date formatting.</li>
+<li>Fixed issue with fixed datagrid that is hidden, showing when a popup is shown the first time.</li>
+<li>Fixed issue where buffering would not work (spatial or graphical) until the buffer properties
+dialog was shown at least once.</li>
+</ul><p>Version 3.0.5 - 8/9/2012</p>
+
+<ul>
+<li>Fixed bug with datagrid click when serching stanalone tables.</li>
+<li>Fixed bug with dropdownlist in multi field expressions not initializing
+properly on startup and on layer change.</li>
+</ul><p>Version 3.0.4 - 8/8/2012</p>
+
+<ul>
+<li>Fixed a few more bugs with datagrid hovering and datagrid field formatting.</li>
+</ul><p>Version 3.0.3 - 8/7/2012</p>
+
+<ul>
+<li>Fixed a few bugs with datagrid and no results from a search.</li>
+</ul><p>Version 3.0.2 - 8/3/2012</p>
+
+<ul>
+<li>Added the ability to have a grid hyperlink icon instead of only hyper link text. This is achieved through
+the new hyperlinkgridicon attribute of a field element.</li>
+<li>Added a new option to the graphical search page that allow you to include the text search options to the
+graphical search if the search layer dropdown is the same on both pages.</li>
+<li>The buffer graphics have a new popup GUI for adjusting their graphics symbology.</li>
+<li>The userlist attribute have a new ability, when you add the text "all" to the comma separated userlist
+and the user chooses this value, then all the values of the userlist will be selected when the query is
+executed.</li>
+<li>All possible items in code have been migrated from mx to spark (probably doesn't mean much to you as the 
+end user, but for me as the developer, it allowed to enhancement to be accomplished).</li>
+</ul><p>Version 3.0.1 - 7/26/2012</p>
+
+<ul>
+<li>The name of the swf and xml file has changed to eSearchWidget.swf and eSearchWidget.xml</li>
+<li>Fixed application hang bug when using the eSearch and new 3.0 print widget.</li>
+<li>Added autozoom configuration to zoom to the selected features automatically whena search is complete.</li>
+<li>Added keepgraphicalsearchenabled configuration option to keep the graphical selection tool that the 
+user chooses active even after a selection has been made. This means that you will not have to clear 
+your selection and re-choose a graphical selection tool in order to make another selection.</li>
+<li>Added autohide to the fixed datagrid. Control of this is now in the SearchWidgetFixedDG.xml file.</li>
+<li>Added predefined datagrid column sorting to all the datagrids. </li>
+</ul><p>Version 3.0 - 6/13/2012</p>
+
+<ul>
+<li>Recompiled for Flex Viewer 3.0</li>
+<li>Fixed issue this tables and new link style</li>
+</ul><p>Version 2.9.0 - 6/5/2012</p>
+
+<ul>
+<li>Added multi-field search expression capability.</li>
+<li>Added attachment support for popups.</li>
+<li>Added multi-field hyperlinks capability.</li>
+<li>When URL Search is performed the GUI reflects the that search criteria.</li>
+<li>Fixed an issue with open SQL URL searches.</li>
+<li>Added link icon tooltip.</li>
+<li>Fixed issue with relate fixed datagrid hyperlinks.</li>
+<li>Fixed issue with interaction with point buffer widget.</li>
+</ul><p>Version 2.5.1.7 - 4/19/2012</p>
+
+<ul>
+<li>Added ability to search (flat/standalone/no geometry) tables.</li>
+<li>This time all Zooming uses the same scaling (popup, datagrid, widget results, zoom to all).</li>
+<li>Added Relates icon/button to datagrids so that you can click on it in the datagrid to
+open relates choice dialog.</li>
+<li>Move all skins to a skins package for cleaner organization.</li>
+<li>Links that are not associated with a field now work.</li>
+<li>Ability to disable the relates tab in the fixed widget is now configurable.</li>
+</ul><p>Version 2.5.1.6 - 3/19/2012</p>
+
+<ul>
+<li>Fixed more issues with subtypes in the datagrids.</li>
+<li>Added new zoom percent to the zoomscale tag where 1 = 100%, 1.2 = 120% (default), etc, etc.</li>
+<li>All Zooming attempts to use the same scaling (popup, datagrid, widget results).
+See ReadMe.txt for a complete list of updates.</li>
+</ul><p>Version 2.5.1.5 - 3/16/2012</p>
+
+<ul>
+<li>Fix more issues with subtypes and a possible issue with integer fields.</li>
+</ul><p>Version 2.5.1.4f - 2/24/2012</p>
+
+<ul>
+<li>Fix error 1009 that was recieved in version 2.5.1.4 when no relate was specified in the XML for a layer.</li>
+</ul><p>Version 2.5.1.4 - 2/22/2012</p>
+
+<ul>
+<li>Each relate can have their own associated icon now.</li>
+</ul><p>Version 2.5.1.3 - 2/21/2012</p>
+
+<ul>
+<li>Fixed issue where you could no longer use an open SQL expression because single quotes
+where being automatically escaped.</li>
+<li>Fixed issue with event theme layers used in a search not having an ObjectID or FID field
+and thus causing the datagrid/results interaction to fail</li>
+</ul><p>Version 2.5.1.2 - 1/12/2012</p>
+
+<ul>
+<li>Fixed error that occurs when you are using the floating adatgrid and click clear,
+then close the datagrid and reopen it the data reappears in the grid and hovering
+over arecord causes an error.</li>
+</ul><p>Version 2.5.1.1 - 1/11/2012</p>
+
+<ul>
+<li>Added the ability to disable the interaction between the widget results and the datagrids
+This becomes important when you have more than 500 results displayed in the datagrids
+Thanks to Dave Jenkins for this suggestion</li>
+<li>Fixed error what occurred when the search widget was minimized and you hover over a grid result</li>
+<li>Added ability to disable the datagrid in the disablebuttons element</li>
+</ul><p>Version 2.5.1 - 1/10/2012</p>
+
+<ul>
+<li>Added the ability to buffer graphics drawn using the graphical search before the 
+graphical search is performed.</li>
+</ul><p>Version 2.5.0.10 - 1/6/2012</p>
+
+<ul>
+<li>If you have multiple links that contain images then the popup will now display all the images
+in the popup media browser</li>
+<li>If a link returns the text "unavailable" than the link will not be added to the widget results,
+popup or either of the datagrids hyperlink results.</li>
+</ul><p>Version 2.5.0.9 - 1/6/2012</p>
+
+<ul>
+<li>Fixed more issues with new multiple links code only grabing link from first 
+record and using that for all results.</li>
+</ul><p>Version 2.5.0.8 - 12/30/2011</p>
+
+<ul>
+<li>Fixed issue with new multiple links not displaying a link in the widgets 
+results if only on link is specified.</li>
+<li>Fixed error when fields all="true" is used in version 2.5.0.7 all the fields 
+contain the name and data of the last field.</li>
+</ul><p>Version 2.5.0.7 - 12/27/2011</p>
+
+<ul>
+<li>Fixed issue with datagrids when compiled using the Adobe 4.5.1 SDK</li>
+<li>Added Multiple Link Support.</li>
+</ul><p>Version 2.5.0.6 - 12/21/2011</p>
+
+<ul>
+<li>Fixed issue where in some circumstances the Fixed Data Grid could 
+extent past the applications width.</li>
+</ul><p>Version 2.5.0.5 - 12/8/2011</p>
+
+<ul>
+<li>Fixed relates button not showing up unless you first do a text search.</li>
+<li>re-enabled the polygon and polyline graphical search abilities.</li>
+<li>When "enable multi-part graphics" is selected and then the Search button is pushed 
+the graphical searches draw tool is now turned off. Meaning after you click search 
+you will have to choose a search geometry type button to perform another search.</li>
+<li>If using the Fixed Datagrid and a relate is chosen then the relate tab is activated. </li>
+</ul><p>Version 2.5.0.4 - 12/7/2011</p>
+
+<ul>
+<li>Fixed a relate query error that only ocurred in certain situations</li>
+</ul><p>Version 2.5.0.3 - 12/6/2011</p>
+
+<ul>
+<li>Fixed Coded domains bug introduced in version 2.5.0.1</li>
+<li>Relates Sum field does not clear when choosing a relate that has no sum field
+specified.</li>
+</ul><p>Version 2.5.0.2 - 12/5/2011</p>
+
+<ul>
+<li>Depreciated tolerance. Now just use toleranceforpointgraphicalselection</li>
+<li>Added a tolerancebydefault option to the SearchWidget.xml.</li>
+</ul><p>Version 2.5.0.1 - 12/5/2011</p>
+
+<ul>
+<li>Fixes bug where subtype was not displayed correctly in the 2 datagrid types.</li>
+</ul><p>Version 2.5 - 12/2/2011</p>
+
+<ul>
+<li>Added Related table display capabilities for searched features</li>
+<li>Added support for domains that come from subtypes.</li>
+</ul><p>Version 2.4.0.14 - 11/19/2011</p>
+
+<ul>
+<li>Grid auto sizes to the hyperlink alias if that length is smaller than the column header</li>
+<li>Fixed issues with alias not getting set for hyperlinkalias if the column name alias was
+not also specified or the case did not match.</li>
+</ul><p>Version 2.4.0.13 - 11/2/2011</p>
+
+<ul>
+<li>Fixed issue with using existing buffer point and use existing draw graphic not enabling
+unless the eSearch is open before the graphics of those widgets were drawn.</li>
+<li>If you select a graphical draw tool and do not draw a graphic and then switch to text search
+the draw tool is still active and tooltip is displayed. This has been fixed to disable the 
+draw tool when switching away from the graphical search view.</li>
+<li>When closing the widget if a buffer graphic is on the screen it's graphics layer will be 
+hidden like the other graphics layers</li>
+</ul><p>Version 2.4.0.12 - 10/25/2011</p>
+
+<ul>
+<li>Repaired the Fixed Datagrid to display coded values when fields have domains. There was a bug
+when you first executed the search the coded values where not displayed but subsequent queries
+would work.</li>
+</ul><p>Version 2.4.0.11 - 10/13/2011</p>
+
+<ul>
+<li>Fix datagrid autosize function when using mapservices with joins 
+in both the floating and fixed datagrids</li>
+</ul><p>Version 2.4.0.10 - 09/13/2011</p>
+
+<ul>
+<li>linkaliastext not being honored when left clicking graphic.</li>
+<li>ItemRollOut in data grid no longer automatically closes the info popup for that graphic.</li>
+</ul><p>Version 2.4.0.9 - 09/12/2011</p>
+
+<ul>
+<li>Added ability to specify linkaliastext for standard linkfield</li>
+</ul><p>Version 2.4.0.8 - 09/10/2011</p>
+
+<ul>
+<li>URL Searches that return single geometry now zoom to return geometry properly.</li>
+</ul><p>Version 2.4.0.7 - 09/03/2011</p>
+
+<ul>
+<li>Null values are now empty strings when exported as csv or txt from the datagrid.</li>
+<li>Added support for Range domains to be used and user entry validated against that
+Range domains min and max values.</li>
+</ul><p>Version 2.4.0.6 - 08/19/2011</p>
+
+<ul>
+<li>Fixed Issue with buffer point widget and enhanced draw widget buttons displaying as disabled
+even when they should have been enabled.</li>
+</ul><p>Version 2.4.0.5 - 08/18/2011</p>
+
+<ul>
+<li>Fixed Issue with fixed datagrid not populating when using the URL Query</li>
+<li>Fixed some grammatical errors</li>
+<li>Fixed issue with zoom to and clear not showing when using the URL Query</li>
+</ul><p>Version 2.4.0.4 - 08/16/2011</p>
+
+<ul>
+<li>Fixed Issue with datagrid not automatically retrieving the grid field alias for Hyperlinkfields.</li>
+<li>Fixed Issue with changing enablemultipartsearch in xml did not have any effect in widget.</li>
+</ul><p>Version 2.4.0.3 - 08/15/2011</p>
+
+<ul>
+<li>datagrids now honor the useutc attribute of a date field.</li>
+<li>Removed leftover alert window when using a link field.</li>
+</ul><p>Version 2.4.0.2 - 08/05/2011</p>
+
+<ul>
+<li>Added the useutc attribute to the field element to allow the utc offset to be aplied to dates</li>
+</ul><p>Version 2.4 - 07/27/2011</p>
+
+<ul>
+<li>Both the compiled and uncompiled version can use the URL Search capability.
+See the Enhanced Search Widget URL Search Configuration.pdf</li>
+<li>Links in the results, popUp and Data grid now do not display a link if the link field contains
+a Null or empty string.</li>
+<li>Fixed error when clearing the graphics results and using the fixed data grid.</li>
+<li>Fixed issue with buffer point widget button displaying as enabled after you hover over it, even
+though it is not enabled.</li>
+</ul><p>Version 2.3.4 - 07/19/2011</p>
+
+<ul>
+<li>Added a child widget that allows you to have a fixed postion datagrid instead of the floating datagrid.</li>
+<li>Added the Enhanced Search Widget Fixed Datagrid Setup.pdf to help with the setup.</li>
+</ul><p>Version 2.3.3 - 07/15/2011</p>
+
+<ul>
+<li>Added option to use existing Point Buffer Widget graphics when doing graphical selection.</li>
+</ul><p>Version 2.3.2.5 - 07/08/2011</p>
+
+<ul>
+<li>Added option to zoom to all returned results.</li>
+</ul><p>Version 2.3.2.4 - 06/24/2011</p>
+
+<ul>
+<li>Added option to enable or disable the new Multi-part geometry graphical search in the config (for startup) and on
+the user interface (for runtime change).</li>
+</ul><p>Version 2.3.2.3 - 06/24/2011</p>
+
+<ul>
+<li>Added new ability to do muti part geometry graphical searches. What this means is the graphical search
+is no longer executed immediately after you draw on the map you can draw multiple same geometry types
+and then click the new search button on the graphical search dialog and the search will be preformed
+using all the drawn geometries. Thanks to Nathan Enge for encouraging me to look into this enhancement
+again.</li>
+<li>Better interaction has been established with the eDraw widget and the button to use the existing eDraw
+graphics is enabled or disabled based on the presence of eDraw graphics layer and number of graphics.
+There can now be multiple eDraw graphics on the screen for the search to use if they are similar geometry
+types.</li>
+<li>Fixed the graphical search tool not deactivating. It deactivates now when you click clear.</li>
+<li>Fixed the selectedgraphicaltool option not activating correctly.</li>
+</ul><p>Version 2.3.2.2 - 06/24/2011</p>
+
+<ul>
+<li>Added new ability to do muti part geometry graphical searches. What this means is the graphical search
+is no longer executed immediately after you draw on the map you can draw multiple same geometry types
+and then click the new search button on the graphical search dialog and the search will be preformed
+using all the drawn geometries. Thanks to Nathan Enge for encouraging me to look into this enhancement
+again.</li>
+<li>Better interaction has been established with the eDraw widget and the button to use the existing eDraw
+graphics is enabled or disabled based on the presence of eDraw graphics layer and number of graphics.
+There can now be multiple eDraw graphics on the screen for the search to use if they are similar geometry
+types.</li>
+</ul><p>Version 2.3.2.1 - 06/23/2011</p>
+
+<ul>
+<li>Added new option "selectedgraphicaltool" for allowing a particular graphical search tool to be selected
+uppon widget load if the defaultselectionoption = graphicalInput. </li>
+</ul><p>Version 2.3.2 - 05/22/2011</p>
+
+<ul>
+<li>Option added to each layer for opening the datagrid automatically when a search is executed.</li>
+<li>usegeometry attribute added to the zoomscale element to specify if the geometry or the scale will be
+used in the zoom when a record is clicked.</li>
+</ul><p>Version 2.3.1 - 05/02/2011</p>
+
+<ul>
+<li>Better Spatial Search results and performance</li>
+<li>Fixed image in popup not showing</li>
+</ul><p>Version 2.3 - 04/25/2011</p>
+
+<ul>
+<li>This version is only for FlexViewer 2.3</li>
+<li>Uses new Flex API Popup Windows</li>
+<li>Added definition Query Support to xml configuration.</li>
+<li>Added user lists. This for people who want to specify certain values that will appear in a dropdown
+instead of having the user type the search string. (comma separated list)</li>
+<li>Enhanced URL Search 
+
+<ul>
+<li>Now allows for specifying the layer and expression to search</li>
+<li>Now the ability to have the datagrid opened from the url search automatically.</li>
+</ul>
+</li>
+<li>Compiled widgets for older viewer versions are now no longer provided. (Time to move on people).</li>
+<li>Many code changes to parallel the standards and practices that esri are putting in their widgets.</li>
+</ul><p>Version 2.2.11 - 03/15/2011</p>
+
+<ul>
+<li>Fixed showing the datagrid after performing a search from the Flex Viewers URL
+!!!!!!Requires Mods to several Flex Viewer components, See additional instructions!!!!!!</li>
+<li>Enhanced Search Widget URL Search Configuration.pdf has been update for some oversights and omissions.</li>
+</ul><p>Version 2.2.10 - 03/4/2011</p>
+
+<ul>
+<li>Fixed the graphical search ability to specify a sum field.</li>
+<li>Added support for performing a search from the Flex Viewers URL
+!!!!!!Requires Mods to several Flex Viewer components, See additional instructions!!!!!! </li>
+</ul><p>Version 2.2.9 - 02/24/2011</p>
+
+<ul>
+<li>Added the ability to specify a sum field. It is your responsibility to only specify sum for one field 
+per layer, to only specify sum on a numeric field, and it must be a grid field!</li>
+<li>Fixed a bug with the fields all="true".</li>
+</ul><p>Version 2.2.8 - 02/14/2011</p>
+
+<ul>
+<li>Added the ability to disable the graphical search using existing draw/eDraw widget graphics.</li>
+<li>Change made when there is not Spatial Relation operations specified in the config file there
+Will be no combobox and label presented on the spatial search page, just the buffer options.</li>
+</ul><p>Version 2.2.7f - 02/08/2011</p>
+
+<ul>
+<li>Added the ability to resize the floating data grid.</li>
+<li>Fixed an issue with disable/enable export option in the data grid on a layer by layer basis.</li>
+<li>Fixed issue with symbology alpha and color being set to 0 or 0x000000.</li>
+<li>Added ability to define a simple marker symbol for point or the current picture marker symbol.</li>
+<li>Fixed SearchWidget.xml issue</li>
+</ul><p>Version 2.2.6 - 02/01/2011</p>
+
+<ul>
+<li>Added the ability to disable/enable export option in the data grid on a layer by layer basis.</li>
+<li>Fixed issue with sorting data grid columns when layer has a join</li>
+<li>Fixed issue with tooltips hanging for coded value domain combobox when using mouse wheel.</li>
+<li>Changed packaging of widget so that assets are included in widget folder for
+easier moving of widget to new versions of the Flex Viewer.</li>
+</ul><p>Version 2.2.5 - 01/19/2011</p>
+
+<ul>
+<li>Added the ability to use coded value domain values in a combobox instead of typing in a text input box.</li>
+<li>Added configuration option to disable certain titlebar buttons.</li>
+<li>Added configuration option to set the default search option on widget load i.e. text, graphical, or spatial</li>
+<li>Added configuration option to add a pixel tolerance to the graphical point search for point on point searches.</li>
+</ul><p>Version 2.2.4 - 01/13/2011</p>
+
+<ul>
+<li>Fixed Issue with existing draw graphics working for the graphical search.</li>
+</ul><p>Version 2.2.3 - 01/06/2011</p>
+
+<ul>
+<li>Fixed Issue with all spatial button firing intersects instead of what they were intended to fire</li>
+<li>Added a clear text button to the results page.</li>
+<li>Better Spatial Icons</li>
+</ul><p>Version 2.2.2 - 12/29/2010</p>
+
+<ul>
+<li>Fix issue with this 2.2.1 spatial query not honoring configuration info.</li>
+<li>Added icons for other supported spatial searches.</li>
+<li>depreciated the use of esriSpatialRelRelation.</li>
+</ul><p>Version 2.2.1</p>
+
+<ul>
+<li>Fixed the issue of the color picker and alpha slider not worker for the buffer.</li>
+<li>Rearranged the graphics layer order to put the buffer under the selected feature.</li>
+<li>Adjusted the SearchWidget.xml so that miles are not the default in the spatial search.</li>
+<li>Fixed issue with hyperlink grid field optional attributes like hyperlinkaliastext, linkprefix, 
+and linksuffix in this version you can omit hyperlinkaliastext, linkprefix, and linksuffix or 
+set them to = "" and it not have an adverse effect as in versions prior to 2.2.1</li>
+</ul><p>Version 2.2</p>
+
+<ul>
+<li>Added compiled versions for FlexViewer 2.1 and 2.2</li>
+<li>REALLY Fixed Issue with linkprefix in datagrid not getting cleared when new search results are issued.</li>
+<li>Completely reworked the way Spatial Searches are done (Thanks to Erwan).</li>
+<li>Added ability for layer to have multiple different SQL Expressions.</li>
+<li>Added Export to tab delimited text as well as comma separated value.</li>
+</ul><p>Version 2.1.7</p>
+
+<ul>
+<li>Fixed Issue with linkprefix in datagrid not getting cleared when new search results are issued.</li>
+</ul><p>Version 2.1.6</p>
+
+<ul>
+<li>Fixed Issue with spatial search requiring the use of a buffer.</li>
+<li>Other minor spatial search tweaks like "where" checkbox tooltip displays example for where clause.</li>
+<li>Fixed Graphical search indicating it is selected when widget is first shown even know it is text</li>
+<li>Spatialreference that is specified in the xml is now used for the buffers spatialrefernce</li>
+</ul><p>Version 2.1.5</p>
+
+<ul>
+<li>Fixed Issue with graphical search not working when spatialsearchlayer and/or spatialrelationlayer
+was set to true for a layer. Thanks to Jos Vroegop for finding this.</li>
+</ul><p>Version 2.1.4</p>
+
+<ul>
+<li>Enhancement made to return coded values if a field has a coded value domain</li>
+<li>Fixed Issue with DataGrid not using linkprefix and linksuffix if specified</li>
+</ul><p>Version 2.1.3</p>
+
+<ul>
+<li>Enhancement made to allow csvSeparator and export button label to be specified for non U.S. users</li>
+<li>Enhancement made to allow for linkprefix text to be added in front of the linkfield
+and linksuffix text to be added to the end of the linkfield</li>
+<li>Enhancement made to allow link iconfield to be specified as well as iconprefix and iconsuffix</li>
+<li>Spatial Search where clauses can now use the already specified query expression or (the Default) use
+a fully user specified where clause.</li>
+<li>Fixed issue with hyperlink field showing alias(undesired) when exported to CSV if an alias is specified.</li>
+</ul><p>Version 2.1.2</p>
+
+<ul>
+<li>Enhancement made to allow fields to have numeric or currency formatting</li>
+<li>Fixed issue with datagrid opening even without grid fields defined - Thanks to Alex Jones for this fix</li>
+<li>Fixed bug introduced by v2.1.1 where hyperlink columns not showing in datagrid</li>
+</ul><p>Version 2.1.1</p>
+
+<ul>
+<li>Fixes issue with Search Results not have all the specified fields</li>
+<li>Enhancement made to use fields alias if an alias is not specified in the SearchWidget.xml</li>
+<li>Enhancement made to use the dateformat attribute in the datagrid for date fields also</li>
+<li>Fixed integration issue with the draw widget</li>
+<li>Fixed the issue of the graphics not be clear from the screen when the widget is closed</li>
+</ul><p>Version 2.1</p>
+
+<p>*Enhancement and migration to FlexViwer 2.1</p>
+
+<ul>
+<li>You now have the ability to do a spatial search such as select traffic cameras
+that are intersected by a buffer of 400 Meters on land zoning polygons with a 
+Zoning_code = 'R1'<br>
+</li>
+</ul><hr><p>****    Thanks to Erwan Caradec for contributing this code addition        ****</p>
+
+<hr><ul>
+<li>Skins have been developed for several of the floating Data grids components.</li>
+<li>Field specification has been simplified you now specify the field you want and
+give then attributes of whether or not they show up in the grid exclusively, 
+are hyperlinks, their alias, etc. The SearchWidget.xml has details of each 
+attribute used.</li>
+</ul><p>Version 1.07
+*Enhancement</p>
+
+<ul>
+<li>You will now be able to search using existing graphics from the Draw Widget</li>
+<li>You need to make a modification to the Draw Widget for this to work (See below in
+How to install section).</li>
+</ul><p>Version 1.06
+*Bug Fix:</p>
+
+<ul>
+<li>Fixed issue with populating Datagrid fields if datagrid is already open</li>
+<li>Removed dependency on having InfoPopup.mxml and RecordData.mxml modified.</li>
+</ul><p>Version 1.05
+*Bug Fix:</p>
+
+<ul>
+<li>Fix issue with Datagrid dataGridColumn label treating a joined field as dot notation instead of
+and actual field name.</li>
+</ul><p>version 1.04</p>
+
+<ul>
+<li>Fix compile bug introduced in 1.0.3</li>
+</ul><p>version 1.03</p>
+
+<ul>
+<li>Now supports field aliases for datagrid column headers</li>
+<li>Now supports html text in the content results
+
+<ul>
+<li>on line 527 of the SearchWidget.mxml just change  which is yellow to your desired font color</li>
+</ul>
+</li>
+<li>Now supports individual layer zoom scales</li>
+</ul><p>version 1.01</p>
+
+<ul>
+<li>Export DataGrid Results to CSV (Requires 3.2 SDK and Flash Player 10.0.22 or higher)</li>
+<li>Ability to have the hyperlink field show the url or an alias of "Get Hyperlink" in the datagrid.</li>
+</ul><h2>
+<a name="features" class="anchor" href="#features"><span class="octicon octicon-link"></span></a>Features</h2>
+
+<pre><code>This sample provides an enhanced version of the SearchWidget for the Flex Sample Viewer.
+</code></pre>
+
+<p>This enhanced version allows you to open a datagrid from the SearchWidget that has its own
+specified fields that are independent of the fields that are specified for the SearchWidget.
+The DataGrid is also an enhanced DatGrid that automatically resizes the columns to fit the data
+inside of them and also for hyperlink fields to be specified. The DataGrid is fully integrated 
+with the SearchWidgets results so when you select a row in the datagrid the same record is 
+selected in the SearchWidgets results and vice versa. The DataGrid is in a floating container 
+so it can be moved to anywhere on the screen, but is not resizable.</p>
+
+<pre><code>The intention of this enhancement is to allow a minimal amount of attributes to be displayed
+</code></pre>
+
+<p>in the standard SerachWidget's results and info window and also allow for detailed or numerous 
+attributes to be displayed when the user what more information.</p>
+
+<p>What's in the zip file:</p>
+
+<p>ExportButtonSkin.mxml   - This is a simple skin to allow the display of a good graphic on a button with text.
+HyperLinkColumn.mxml            - Allows for the Datagrid to have a field that contains a url to function as a hyperlink.
+SearchResult.as         - This is basically the attributes of the search results.
+SearchResultDatagroup.as    - This is the event dispatcher for the search results.
+SearchResultItemRenderer.mxml   - This is the item renederer for the Spark data group that displays the search results.
+SearchWidget.mxml       - Standard ESRI SearchWidget Enchanced to add the floating DataGrid and interaction between results and DataGrid, 
+                  and remove Shape_Length, Shape_Area fields from the results.
+SearchWidget.xml                - Standard ESRI SearchWidget configuration file with many additions to configure the enhanced features of this widget.
+SearchWidgetFloatDG.mxml        - A customized datagrid that automatically resizes the columns to fit the data and is in a floating canvas.
+SearchWidgetFloatDGSkin.mxml    - This is a skin that allows the use of the export button skin and the close widget button skin on the form.
+WidgetCloseButtonSkin.mxml  - I created this skin so that it would not be necessary to create a png for the close button that matched the 
+                  current theme being used.
+i_table2.png            - a icon file for the button that brings up the floating DataGrid
+i_searchspatial.png     - a icon for the spatial search.
+i_draw_draw.png         - a icon for the use of the draw widgets graphics</p>
+
+<h2>
+<a name="requirements" class="anchor" href="#requirements"><span class="octicon octicon-link"></span></a>Requirements</h2>
+
+<ul>
+<li>The ArcGIS Flex API 2.x or greater swc. Download it here:  <a href="http://resources.esri.com/arcgisserver/apis/flex/index.cfm?fa=downloadDisclaimer">http://resources.esri.com/arcgisserver/apis/flex/index.cfm?fa=downloadDisclaimer</a>
+</li>
+<li>Internet access to the ArcGIS Online servers</li>
+<li>Web Server to deploy the application</li>
+<li>Flash Player 10</li>
+</ul><h2>
+<a name="how-to-install" class="anchor" href="#how-to-install"><span class="octicon octicon-link"></span></a>How to install</h2>
+
+<hr><p>** IMPORTANT FOR the use of existing draw graphics to be used for the graphical **
+** search you need to follow the next step below                                **</p>
+
+<hr><ul>
+<li>Add the following lines to the DrawWidget.mxml in the init function under this line 'graphicsLayer = new GraphicsLayer();'
+graphicsLayer.name = "Draw Features";
+graphicsLayer.id = "Draw Features";</li>
+</ul><p>For both the compiled and uncompiled version you need to copy the contents
+of the assest/images to your projects assets/images folder.</p>
+
+<p>To install using the compiled version just copy the folder called eSearch
+under the Widgets folder, and add this line to your config.xml</p>
+
+<p></p>
+
+<p>For the Uncompiled you need to copy the eSearch folder to src/widgets</p>
+
+<p>Finalize the install for Uncompiled version:</p>
+
+<ul>
+<li>In Flex Builder on the left of the screen is the FlexNavigator tree, right click you Flex Sample Viewer project
+and go to properties</li>
+<li>In the Properties dialog choose Flex Compiler in the left window.</li>
+<li>Ensure your Flex SDK Version is 4.0</li>
+<li>Check Require Flash Player Version under HTML Wrapper and enter 10.0</li>
+<li>Now Flex Modules in the left window.</li>
+<li>On the right hand side of the dialog will be an add buton click it</li>
+<li>browse to src\widgets\eSearch and add the SearchWidget.mxml</li>
+<li>click ok all the way out.</li>
+<li>Change the SearchWidget.xml just like you would in the original SearchWidget that ESRI provided and add your gridfields
+and gridhyperfields (these are optional if you do not want a datagrid for a particular layer then just leave these
+elements empty.</li>
+</ul><p>Thats it enjoy, if you have any comments or suggestions just post a comment on the code gallery.</p>
+
+<p>Robert Scheitlin
+GIS Manager
+GIS Programmer
+Calhoun County Commission
+Alabama</p>
+        </article>
+      </div>
+    </div>
+    <footer>
+      <div class="owner">
+      <p><a href="https://github.com/rscheitlin" class="avatar"><img src="https://avatars1.githubusercontent.com/u/1216460?s=60" width="48" height="48"/></a> <a href="https://github.com/rscheitlin">rscheitlin</a> maintains <a href="https://github.com/rscheitlin/eSearch">eSearch</a></p>
+
+
+      </div>
+      <div class="creds">
+        <small>This page generated using <a href="http://pages.github.com/">GitHub Pages</a><br/>theme by <a href="https://twitter.com/jonrohan/">Jon Rohan</a></small>
+      </div>
+    </footer>
+  </div>
+  <div class="current-section">
+    <a href="#top">Scroll to top</a>
+    <a href="https://github.com/rscheitlin/eSearch/tarball/master" class="tar">tar</a><a href="https://github.com/rscheitlin/eSearch/zipball/master" class="zip">zip</a><a href="" class="code">source code</a>
+    <p class="name"></p>
+  </div>
+
+  
+</body>
+</html>
