@@ -55,6 +55,7 @@ package widgets.eSearch
         private var _allString:String;
         private var _proxy:String;
         private var _defExpr:String;
+        private var _version:Number;
         
         private var query:Query = new Query;
         private var queryTask:QueryTask = new QueryTask();
@@ -68,7 +69,7 @@ package widgets.eSearch
         
         private var dateFormatter:DateTimeFormatter = new DateTimeFormatter();
         
-        public function PagingQueryTask(url:String="", fieldName:String="", useAMF:Boolean=false, 
+        public function PagingQueryTask(url:String="", fieldName:String="", versionNum:Number=0, 
                                         sItemVal:SearchExpValueItem=null, uniqueCache:Object=null, 
                                         isRequired:Boolean=false, dateFormat:String="",
                                         useUTC:Boolean=false, token:String=null, proxy:String=null,
@@ -78,7 +79,7 @@ package widgets.eSearch
             _fieldName = fieldName;
             _sItemVal = sItemVal;
             _uniqueCache = uniqueCache;
-            _useAMF = useAMF;
+            _useAMF = (versionNum && versionNum > 10)?true:false;
             _isRequired = isRequired;
             _dateFormat = dateFormat;
             _useUTC = useUTC;
@@ -86,6 +87,7 @@ package widgets.eSearch
             _proxy = proxy;
             _defExpr = defExpr;
             _allString = allString;
+            _version = versionNum;
         }
 
         /**
@@ -294,7 +296,11 @@ package widgets.eSearch
             isQuerying = true;
             
             query.returnGeometry = false;
-            query.outFields = [_fieldName]
+            query.outFields = [_fieldName];
+            if(_version >= 10.1){
+                query.orderByFields = [_fieldName];
+                query.returnDistinctValues = true;
+            }
             query.objectIds = null;
             if(_defExpr && _defExpr != ""){
                 query.where = _defExpr;
@@ -307,7 +313,11 @@ package widgets.eSearch
             if(_proxy){
                 queryTask.proxyURL = _proxy;
             }
-            queryTask.executeForIds(query, new AsyncResponder(onExecuteForIdsComplete, queryTask_faultHandler));
+            if(_version >= 10.1){
+                queryTask.execute(query,  new AsyncResponder(queryTask_executeCompleteHandler, queryTask_faultHandler));
+            }else{
+                queryTask.executeForIds(query, new AsyncResponder(onExecuteForIdsComplete, queryTask_faultHandler));
+            }
         }
         
         /**
@@ -408,14 +418,24 @@ package widgets.eSearch
             query.where = "";
             query.text = null;
             var uVal:SearchDDItem;
-            featuresProcessed += featureSet.attributes.length;
+            if(_version < 10.1){
+                featuresProcessed += featureSet.attributes.length;
+            }
             
-            allValues = allValues.concat(featureSet.attributes);    
-
-            //check to see if all records were returned.
-            if (featuresProcessed >= objectIdsArray.length){
+            allValues = allValues.concat(featureSet.attributes); 
+            
+            if(_version >= 10.1){
+                //reset the escape parameter if it was triggered.
+                if (esc == true){
+                    esc = false;
+                    isQuerying = false;
+                    dispatchEvent(new FlexEvent("pagingComplete"));
+                }
+                
                 // get the unique values
                 uniqueValues = getDistinctValues(allValues, _fieldName);
+                isQuerying = false;
+                
                 if(_dateFormat != ""){
                     replaceDatesWithStrings();
                     return;
@@ -439,47 +459,79 @@ package widgets.eSearch
                     uVal.value = "allu";
                     uniqueValues.push(uVal);
                     dispatchEvent(new FlexEvent("pagingComplete"));
-                    isQuerying = false;
+                    //isQuerying = false;
                     return;
                 }
-            }
-                
-            // check to see if max records has been determined.
-            // add the max records to the start index as these have already been queried.
-            if (iMaxRecords == 0){
-                iMaxRecords = featuresProcessed;
-                iStart += iMaxRecords;
-            }
-            
-            // Query the server for the next lot of features
-            // Use the objectids as the input for the query.
-            // Do not continue if the esc button has been pressed.
-            if (iStart < objectIdsArray.length && esc == false){
-                //If we get this far we need to requery the server for the next lot of records
-                isQuerying = true;
-                FlexGlobals.topLevelApplication.addEventListener(KeyboardEvent.KEY_UP, keyUpHandler);
-                
-                query.objectIds = objectIdsArray.slice(iStart, iStart + iMaxRecords);
-                queryTask.useAMF = _useAMF;
-                queryTask.token = _token;
-                if(_proxy){
-                    queryTask.proxyURL = _proxy;
+            } else{
+                //check to see if all records were returned.
+                if (featuresProcessed >= objectIdsArray.length){
+                    // get the unique values
+                    uniqueValues = getDistinctValues(allValues, _fieldName);
+                    if(_dateFormat != ""){
+                        replaceDatesWithStrings();
+                        return;
+                    }else{
+                        if(_isRequired == false){
+                            //trace(ObjectUtil.toString(uniqueValues));
+                            if(blankStringExists){
+                                uVal = new SearchDDItem;
+                                uVal.value = " ";
+                                uVal.label = '" "';
+                                uniqueValues.shift();
+                                uniqueValues.splice(0, 0, uVal);
+                            }
+                            uVal = new SearchDDItem;
+                            uVal.label = "";
+                            uVal.value = "";
+                            uniqueValues.splice(0, 0, uVal);
+                        }
+                        uVal = new SearchDDItem;
+                        uVal.label = _allString;
+                        uVal.value = "allu";
+                        uniqueValues.push(uVal);
+                        dispatchEvent(new FlexEvent("pagingComplete"));
+                        isQuerying = false;
+                        return;
+                    }
                 }
-                queryTask.execute(query, new AsyncResponder(queryTask_executeCompleteHandler, 
-                                                            queryTask_faultHandler));
                 
-                iStart += iMaxRecords;
+                // check to see if max records has been determined.
+                // add the max records to the start index as these have already been queried.
+                if (iMaxRecords == 0){
+                    iMaxRecords = featuresProcessed;
+                    iStart += iMaxRecords;
+                }
+                
+                // Query the server for the next lot of features
+                // Use the objectids as the input for the query.
+                // Do not continue if the esc button has been pressed.
+                if (iStart < objectIdsArray.length && esc == false){
+                    //If we get this far we need to requery the server for the next lot of records
+                    isQuerying = true;
+                    FlexGlobals.topLevelApplication.addEventListener(KeyboardEvent.KEY_UP, keyUpHandler);
+                    
+                    query.objectIds = objectIdsArray.slice(iStart, iStart + iMaxRecords);
+                    queryTask.useAMF = _useAMF;
+                    queryTask.token = _token;
+                    if(_proxy){
+                        queryTask.proxyURL = _proxy;
+                    }
+                    queryTask.execute(query, new AsyncResponder(queryTask_executeCompleteHandler, 
+                        queryTask_faultHandler));
+                    
+                    iStart += iMaxRecords;
+                }
+                
+                //reset the escape parameter if it was triggered.
+                if (esc == true){
+                    esc = false;
+                    isQuerying = false;
+                    dispatchEvent(new FlexEvent("pagingComplete"));
+                }
+                
+                // get the unique values
+                uniqueValues = getDistinctValues(allValues, _fieldName);
             }
-            
-            //reset the escape parameter if it was triggered.
-            if (esc == true){
-                esc = false;
-                isQuerying = false;
-                dispatchEvent(new FlexEvent("pagingComplete"));
-            }
-            
-            // get the unique values
-            uniqueValues = getDistinctValues(allValues, _fieldName);
         }
         
         /**

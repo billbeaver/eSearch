@@ -1014,21 +1014,21 @@
                                 currFormatStr = (sumColumn as eGridColumn).CurrencyFormat;
                             }
                             var args2:Array = currFormatStr.split("|");
-                            if(args[0]){
-                                currFormatter.currencySymbol = args[0];
+                            if(args2[0]){
+                                currFormatter.currencySymbol = args2[0];
                                 currFormatter.useCurrencySymbol = true;
                             }
-                            if(args[1]){
-                                currFormatter.fractionalDigits = args[1];
+                            if(args2[1]){
+                                currFormatter.fractionalDigits = args2[1];
                             }
-                            if(args[2]){
-                                currFormatter.groupingSeparator = args[2];
+                            if(args2[2]){
+                                currFormatter.groupingSeparator = args2[2];
                                 currFormatter.useGrouping = true;
                             }else{
                                 currFormatter.useGrouping = false;
                             }
-                            if(args[3]){
-                                currFormatter.decimalSeparator = args[3];
+                            if(args2[3]){
+                                currFormatter.decimalSeparator = args2[3];
                             }
                             taSum.text = currFormatter.format(total);
                         }else{

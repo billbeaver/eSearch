@@ -5,6 +5,13 @@
 [![Image of Enhanced Search Widget](https://raw.github.com/rscheitlin/eSearch/master/Preview.jpg "Example Enhanced Search Widget app")](http://gis.calhouncounty.org/FlexViewer3.1/index.html?config=config-eSearch.xml&esearch=2&slayer=3&exprnum=1)
 
 ## Version Updates
+Version 3.6.8 - 6/23/2014
+* Fixed a bug with sum field when the format was currency.
+* If the selectedgraphicaltool has been specified or you have already used a graphical search tool
+  when you switch to the graphical search tab that tool will be selected automatically.
+* Uniquevalsfromfield now optimized to use returnDistinctValues if the server version is 10.1 or greater 
+  (this means no paging and faster unique values). Thanks to Daryl Anderson for this idea.
+  
 Version 3.6.7 - 5/29/2014
 * Fixed a few graphical query issues introduced in 3.6.6. 
 * Fixed hyperlinkaliastext not being used with working with related data.

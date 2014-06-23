@@ -384,8 +384,8 @@
             private var subSelAlpha:Number;
 
             //Build Constants
-            protected const VERSION:String = "3.6.7";
-            protected const BUILDDATE:String = "5/29/2014";
+            protected const VERSION:String = "3.6.8";
+            protected const BUILDDATE:String = "6/23/2014";
 
             //Resources
             [Embed(source="widgets/eSearch/assets/images/i_about.png")]
@@ -4221,9 +4221,8 @@
                     this.cursorManager.removeBusyCursor();
                 }else{
                     var vNum:Number = (queryLayer.layerDetails)?queryLayer.layerDetails.version:queryLayer.tableDetails.version;
-                    var isTenOrGreater:Boolean = (vNum >= 10);
                     pagingAttempts = 0;
-                    pagingQueryTask = new PagingQueryTask(queryLayer.url, targetField, isTenOrGreater, sItemVal,
+                    pagingQueryTask = new PagingQueryTask(queryLayer.url, targetField, vNum, sItemVal,
                         uniqueCache, sItemVal.isValueRequired, targetDateFormat, uUseUTC, queryLayer.token, 
                         queryLayer.proxyURL, queryLayer.definitionExpression, allString);
                     pagingQueryTask.addEventListener("pagingComplete",pagingQueryTask_complete);
@@ -5766,6 +5765,13 @@
                 currentState = "graphicalInput";
                 if(cboLayerGraphical.selectedIndex == -1){
                     cboLayerGraphical.selectedIndex = 0;
+                }
+                if(selectedGraphicalTool || lastTool){
+                    if(lastTool){
+                        activateSearchTool(null, lastTool);
+                    }else{
+                        activateSearchTool(null, selectedGraphicalTool);
+                    }
                 }
             }
 
