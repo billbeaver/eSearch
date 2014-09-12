@@ -248,6 +248,8 @@
             private var nodatagridMessage:String;
             private var bufferMessage:String;
             [Bindable] private var chooseRealteLabel:String;
+            private var resultGraLayer:GraphicsLayer;
+            private var gProvider:ArrayCollection;
 
             //Properties
             private var qFeatSet:FeatureSet;
@@ -384,8 +386,8 @@
             private var subSelAlpha:Number;
 
             //Build Constants
-            protected const VERSION:String = "3.6.8";
-            protected const BUILDDATE:String = "6/23/2014";
+            protected const VERSION:String = "3.6.9";
+            protected const BUILDDATE:String = "9/12/2014";
 
             //Resources
             [Embed(source="widgets/eSearch/assets/images/i_about.png")]
@@ -405,6 +407,11 @@
                 var fLayer:FeatureLayer = new FeatureLayer;
                 sWidget = this;
                 WIDGET_URL = config.substring(0,config.lastIndexOf("/")) + "/assets/images/";
+                
+                resultGraLayer = new GraphicsLayer();
+                resultGraLayer.visible = false;
+                resultGraLayer.addEventListener(FlexEvent.HIDE, resultFeatureLayer_hideHandler);
+                
                 if (configXML){
                     if (GeometryServiceSingleton.instance.url){
                         geometryService.url = GeometryServiceSingleton.instance.url;
@@ -1207,14 +1214,15 @@
                             var uDateFormat:String = configSearchText[0].expr[0].values[v].dateformat;
                             var uUseUTC:Boolean = configSearchText[0].expr[0].values[v].useutc;
                             if(!pagingQueryTask.isQuerying && (configSearchText[0].layer)?configSearchText[0].layer.loaded:configSearchText[0].table.loaded){
-                                popCBwithUnique(uFld, sItemVal, uDateFormat, uUseUTC);
+                                popCBwithUnique(uFld, sItemVal, uDateFormat, uUseUTC, true);
                             }else{
                                 //add this field to the Que
                                 var queObj:Object = {
                                     ufld: uFld,
                                     sitemval: sItemVal,
                                     udatefmt: uDateFormat,
-                                    uuseutc: uUseUTC
+                                    uuseutc: uUseUTC,
+                                    startup: true
                                 }
                                 popCBwithUniqueQue.push(queObj);
                             }
@@ -1310,7 +1318,7 @@
                     {
                         if(popCBwithUniqueQue.length > 0){
                             var arr:Object = popCBwithUniqueQue.shift();
-                            popCBwithUnique(arr.ufld, arr.sitemval, arr.udatefmt, arr.uuseutc);
+                            popCBwithUnique(arr.ufld, arr.sitemval, arr.udatefmt, arr.uuseutc, arr.startup);
                         }
                         if(configSearchText[0].layer && !configSearchText[0].symbology){
                             var gType:String = (event.layer as FeatureLayer).layerDetails.geometryType;
@@ -1498,21 +1506,6 @@
                 queryFeaturesText();
             }
 
-            /*
-            * The FeatureLayer select features does not return a FeatureSet like the QueryFeatures did so I have to
-            * create it myself from the array of features (graphics)
-            *    @param Array feats is an array of graphics
-            */
-            private function createFeatureSet(feats:Array):void
-            {
-                featLyrLen = qFeatLayer.selectedFeatures.length;
-                qFeatSet = new FeatureSet(qFeatLayer.selectedFeatures);
-                qFeatSet.fields = (queryLayer.layerDetails)?queryLayer.layerDetails.fields:queryLayer.tableDetails.fields;
-                qFeatSet.displayFieldName = (queryLayer.layerDetails)?queryLayer.layerDetails.displayField:queryLayer.tableDetails.displayField;
-                gridDataProvider = qFeatSet.attributes;
-                resultsFeatureSet = qFeatSet;
-                featSethasGeom = (queryLayer.layerDetails)?true:false;
-            }
 
             /*
             * Setup the datagrid fields for the selected search layer
@@ -1681,19 +1674,9 @@
                     }
                     return;
                 }
-
-                if(queryLayer != qFeatLayer){
-                    map.removeLayer(qFeatLayer);
-                    qFeatLayer = queryLayer;
-                    if(typeQ == "layer"){
-                        qFeatLayer.renderer = new SimpleRenderer(getFeatLyrSymbol(qFeatLayer, "queryFromURL", slayerId));
-                    }
-                    qFeatLayer.name = qFeatLayer.id = "hiddenLayer_eSearchSelectionLayer";
-                    qFeatLayer.addEventListener(FlexEvent.HIDE, featLayer_hideHandler);
-                    featLyrLen = qFeatLayer.selectedFeatures.length;
-                    map.addLayer(qFeatLayer);
-                }
-
+                
+                qFeatLayer = queryLayer;
+                
                 if(searchGroup.numElements > 1){
                     for(var sgi:Number = searchGroup.numElements - 1; sgi >= 1; sgi--){
                         searchGroup.removeElementAt(sgi);
@@ -1761,7 +1744,8 @@
                                 ufld: uFld,
                                 sitemval: sItemVal,
                                 udatefmt: uDateFormat,
-                                uuseutc: uUseUTC
+                                uuseutc: uUseUTC,
+                                startup: false
                             }
                             popCBwithUniqueQue.push(queObj);
                         }
@@ -1849,18 +1833,21 @@
                         queryLayer.definitionExpression = queryDefExpr;
                     }
                     map.cursorManager.setBusyCursor();
-                    queryLayer.selectFeatures(query, FeatureLayer.SELECTION_NEW, new AsyncResponder(onResult, onFault, queryFields));
+                    queryLayer.queryFeatures(query, new AsyncResponder(onResult, onFault, queryFields));
                     showMessage(loadingLabel, true);
                     showStateResults();
 
                     // on result
-                    function onResult(feats:Array, token:XMLList = null):void
+                    function onResult(featSet:FeatureSet, token:XMLList = null):void
                     {
-                        try{
-                            createFeatureSet(feats);
-                            qFeatLayer.selectionColor = Number.NaN;
+                        //try{
+                            if (!resultGraLayer.map)
+                            {
+                                map.addLayer(resultGraLayer);
+                            }
+                            
                             var gid:Number = 0;
-                            for each (var gra:Graphic in feats){
+                            for each (var gra:Graphic in featSet.features){
                                 var obj:Object = gra.attributes;
                                 if(typeQ == "layer"){
                                     if(!queryLayer.layerDetails.objectIdField){
@@ -1881,15 +1868,24 @@
                             if(searchResultAC){
                                 searchResultAC.removeAll();
                             }
+                            
+                            qFeatSet = featSet;
+                            gProvider = new ArrayCollection(featSet.features);
+                            
+                            featLyrLen = featSet.features.length;
+                            gridDataProvider = qFeatSet.attributes;
+                            resultsFeatureSet = qFeatSet;
+                            featSethasGeom = (queryLayer.layerDetails)?true:false;
+                            
                             if(queryLayerRels && queryLayerRels.length > 0){
-                                searchResultAC = createSearchResults(feats, token, queryLayerRels, "queryFromURL");
+                                searchResultAC = createSearchResults(token, queryLayerRels, "queryFromURL");
                             }else{
-                                searchResultAC = createSearchResults(feats, token, null, "queryFromURL");
+                                searchResultAC = createSearchResults(token, null, "queryFromURL");
                             }
 
                             // share data
                             addSharedData(widgetTitle, searchResultAC);
-                            showMessage(selectionLabel + " " + feats.length, false);
+                            showMessage(selectionLabel + " " + featSet.features.length, false);
                             msgVisible = true;
                             map.cursorManager.removeBusyCursor();
                             if(searchResultAC.length > 0){
@@ -1952,15 +1948,15 @@
                                 addSharedData("configFixedDatagrid", dgconfigArr);
                             }
                             executingURLquery = false;
-                        }
-                        catch (error:Error){
+                        //}
+                        /*catch (error:Error){
                             map.cursorManager.removeBusyCursor();
                             showMessage(error.message, false);
-                        }
+                        }*/
                         map.cursorManager.removeBusyCursor();
                     }
                     //on fault
-                    function onFault(info:Object, token:Object = null) : void
+                   function onFault(info:Object, token:Object = null) : void
                     {
                         map.cursorManager.removeBusyCursor();
                         showMessage(info.toString(), false);
@@ -2028,6 +2024,7 @@
             */
             private function searchLayerChangedText():void
             {
+                clear();
                 if(searchGroup.numElements > 1){
                     for(var sgi:Number = searchGroup.numElements - 1; sgi >= 1; sgi--){
                         searchGroup.removeElementAt(sgi);
@@ -2093,7 +2090,8 @@
                                 ufld: uFld,
                                 sitemval: sItemVal,
                                 udatefmt: uDateFormat,
-                                uuseutc: uUseUTC
+                                uuseutc: uUseUTC,
+                                startup: false
                             }
                             popCBwithUniqueQue.push(queObj);
                         }
@@ -2186,7 +2184,8 @@
                                 ufld: uFld,
                                 sitemval: sItemVal,
                                 udatefmt: uDateFormat,
-                                uuseutc: uUseUTC
+                                uuseutc: uUseUTC,
+                                startup: false
                             }
                             popCBwithUniqueQue.push(queObj);
                         }
@@ -2545,21 +2544,11 @@
                     queryLayer.addEventListener(LayerEvent.LOAD, queryLayer_loadHandler);
                     function queryLayer_loadHandler(event:LayerEvent):void
                     {
-                        queryFeaturesText()
+                        queryFeaturesText();
                     }
                     return;
                 }
-                if(queryLayer != qFeatLayer){
-                    map.removeLayer(qFeatLayer);
-                    qFeatLayer = queryLayer;
-                    if(typeQ == "layer"){
-                        qFeatLayer.renderer = new SimpleRenderer(getFeatLyrSymbol(qFeatLayer, "queryFeaturesText"));
-                    }
-                    qFeatLayer.name = qFeatLayer.id = "hiddenLayer_eSearchhSelectionLayer";
-                    qFeatLayer.addEventListener(FlexEvent.HIDE, featLayer_hideHandler);
-                    featLyrLen = qFeatLayer.selectedFeatures.length;
-                    map.addLayer(qFeatLayer);
-                }
+                qFeatLayer = queryLayer;
 
                 var oidFld:String;
                 if(queryLayer.layerDetails){
@@ -2668,18 +2657,58 @@
                         queryLayer.definitionExpression = queryDefExpr;
                     }
                     map.cursorManager.setBusyCursor();
-                    qFeatLayer.selectFeatures(query, selectionMethodText.selectedItem.selectionName, new AsyncResponder(onResult, onFault, queryFields));
+                    qFeatLayer.queryFeatures(query, new AsyncResponder(onResult, onFault, queryFields));
                     showMessage(loadingLabel, true);
                     showStateResults();
 
                     // on result
-                    function onResult(feats:Array, token:XMLList = null):void
+                    function onResult(featSet:FeatureSet, token:XMLList = null):void
                     {
                         //try{
-                            createFeatureSet(feats);
-                            qFeatLayer.selectionColor = Number.NaN;
+                            var gra:Graphic;
+                            var adding:Boolean;
+                            var removing:Boolean;
+                            if(selectionMethodText.selectedItem.selectionName == FeatureLayer.SELECTION_ADD){
+                                adding = true;
+                            }else if(selectionMethodText.selectedItem.selectionName == FeatureLayer.SELECTION_SUBTRACT){
+                                removing = true;
+                            }
+                            if(searchResultAC){
+                                searchResultAC.removeAll();
+                            }
+                            if(adding && qFeatSet && qFeatSet.features && qFeatSet.features.length > 0){
+                                for each (gra in featSet.features){
+                                    gProvider.addItem(gra);
+                                    if(qFeatSet.features.indexOf(gra) < 0){
+                                        qFeatSet.features.push(gra);
+                                    }
+                                }
+                            }else if (removing && qFeatSet && qFeatSet.features && qFeatSet.features.length > 0){
+                                for each (gra in featSet.features){
+                                    for (var g:int = qFeatSet.features.length - 1; g >= 0; g--){
+                                        if(qFeatSet.features[g].attributes[oidFld] == gra.attributes[oidFld]){
+                                            qFeatSet.features.splice(g,1);
+                                            break;
+                                        }
+                                    }
+                                }
+                                gProvider = new ArrayCollection(qFeatSet.features);
+                            }else{
+                                qFeatSet = featSet;
+                                gProvider = new ArrayCollection(featSet.features);
+                            }
+                            
+                            featLyrLen = featSet.features.length;
+                            gridDataProvider = qFeatSet.attributes;
+                            resultsFeatureSet = qFeatSet;
+                            featSethasGeom = (queryLayer.layerDetails)?true:false;
+                            
+                            if (!resultGraLayer.map)
+                            {
+                                map.addLayer(resultGraLayer);
+                            }
                             var gid:Number = 0;
-                            for each (var gra:Graphic in feats){
+                            for each (gra in featSet.features){
                                 var obj:Object = gra.attributes;
                                 if(typeQ == "layer"){
                                     if(!queryLayer.layerDetails.objectIdField){
@@ -2697,26 +2726,15 @@
                                     }
                                 }
                             }
-                            var adding:Boolean;
-                            var removing:Boolean;
-                            if(selectionMethodText.selectedItem.selectionName == FeatureLayer.SELECTION_ADD){
-                                adding = true;
-                            }else if(selectionMethodText.selectedItem.selectionName == FeatureLayer.SELECTION_SUBTRACT){
-                                removing = true;
-                            }else{ //means a new selection and we should avoid a memory leak by clearing the searchResultsAC
-                                if(searchResultAC){
-                                    searchResultAC.removeAll();
-                                }
-                            }
                             if(queryLayerRels && queryLayerRels.length > 0){
-                                searchResultAC = createSearchResults((adding || removing)?feats:qFeatLayer.selectedFeatures, token, queryLayerRels, "queryFeaturesText", adding, removing);
+                                searchResultAC = createSearchResults(token, queryLayerRels, "queryFeaturesText");
                                 if(queryLayerRels.length == 1){
                                     relateToolTip = queryLayerRels[0].label;
                                 }else{
                                     relateToolTip = relateToolTip;
                                 }
                             }else{
-                                searchResultAC = createSearchResults((adding || removing)?feats:qFeatLayer.selectedFeatures, token, null, "queryFeaturesText", adding, removing);
+                                searchResultAC = createSearchResults(token, null, "queryFeaturesText");
                             }
 
                             // share data
@@ -2877,16 +2895,7 @@
 
                 var qFields:Array;
                 queryLayer = layerConfig.layer;
-
-                if(queryLayer != qFeatLayer){
-                    map.removeLayer(qFeatLayer);
-                    qFeatLayer = queryLayer;
-                    qFeatLayer.renderer = new SimpleRenderer(getFeatLyrSymbol(qFeatLayer, initiator));
-                    qFeatLayer.name = qFeatLayer.id = "hiddenLayer_eSearchhSelectionLayer";
-                    qFeatLayer.addEventListener(FlexEvent.HIDE, featLayer_hideHandler);
-                    featLyrLen = qFeatLayer.selectedFeatures.length;
-                    map.addLayer(qFeatLayer);
-                }
+                qFeatLayer = queryLayer;
 
                 var oidFld:String;
                 if(queryLayer.layerDetails){
@@ -2969,17 +2978,20 @@
                         queryLayer.definitionExpression = queryDefExpr;
                     }
                     map.cursorManager.setBusyCursor();
-                    queryLayer.selectFeatures(query, (initiator == "graphical")?selectionMethodGraphical.selectedItem.selectionName:selectionMethodSpatial.selectedItem.selectionName, new AsyncResponder(onResult, onFault, queryFields));
+                    queryLayer.queryFeatures(query, new AsyncResponder(onResult, onFault, queryFields));
                     showMessage(loadingLabel, true);
                     showStateResults();
                     // on result
-                    function onResult(feats:Array, token:XMLList = null):void
+                    function onResult(featSet:FeatureSet, token:XMLList = null):void
                     {
                         try{
-                            createFeatureSet(feats);
-                            qFeatLayer.selectionColor = Number.NaN;
+                            if (!resultGraLayer.map)
+                            {
+                                map.addLayer(resultGraLayer);
+                            }
                             var gid:Number = 0;
-                            for each (var gra:Graphic in feats){
+                            //for each (var gra:Graphic in feats){
+                            for each (var gra:Graphic in featSet.features){
                                 var obj:Object = gra.attributes;
                                 if(!queryLayer.layerDetails.objectIdField){
                                     obj["oid"] = gid;
@@ -2994,18 +3006,43 @@
                                 adding = true;
                             }else if(selectionMethodGraphical.selectedItem.selectionName == FeatureLayer.SELECTION_SUBTRACT){
                                 removing = true;
-                            }else{//means a new selection and we should avoid a memory leak by clearing the searchResultsAC
-                                if(searchResultAC){
-                                    searchResultAC.removeAll();
-                                }
                             }
+                            if(searchResultAC){
+                                searchResultAC.removeAll();
+                            }
+                            
+                            if(adding && qFeatSet && qFeatSet.features && qFeatSet.features.length > 0){
+                                for each (gra in featSet.features){
+                                    gProvider.addItem(gra);
+                                    if(qFeatSet.features.indexOf(gra) < 0){
+                                        qFeatSet.features.push(gra);
+                                    }
+                                }
+                            }else if (removing && qFeatSet && qFeatSet.features && qFeatSet.features.length > 0){
+                                for each (gra in featSet.features){
+                                    for (var g:int = qFeatSet.features.length - 1; g >= 0; g--){
+                                        if(qFeatSet.features[g].attributes[oidFld] == gra.attributes[oidFld]){
+                                            qFeatSet.features.splice(g,1);
+                                            break;
+                                        }
+                                    }
+                                }
+                                gProvider = new ArrayCollection(qFeatSet.features);
+                            }else{
+                                qFeatSet = featSet;
+                                gProvider = new ArrayCollection(featSet.features);
+                            }
+                            
+                            featLyrLen = featSet.features.length;
+                            gridDataProvider = qFeatSet.attributes;
+                            
                             if(queryLayerRels && queryLayerRels.length > 0){
-                                searchResultAC = createSearchResults((adding || removing)?feats:qFeatLayer.selectedFeatures, token, queryLayerRels, (initiator == "graphical")?"graphical":"queryFeaturesSpatial", adding, removing);
+                                searchResultAC = createSearchResults(token, queryLayerRels, (initiator == "graphical")?"graphical":"queryFeaturesSpatial");
                                 if(queryLayerRels.length == 1){
                                     relateToolTip = queryLayerRels[0].label;
                                 }
                             }else{
-                                searchResultAC = createSearchResults((adding || removing)?feats:qFeatLayer.selectedFeatures, token, null, (initiator == "graphical")?"graphical":"queryFeaturesSpatial", adding, removing);
+                                searchResultAC = createSearchResults(token, null, (initiator == "graphical")?"graphical":"queryFeaturesSpatial");
                             }
                             showMessage(selectionLabel + " " + qFeatSet.features.length, false);
                             if(floatorfixed == "float"){
@@ -3309,10 +3346,10 @@
                 if(isGraphicalBufferOp){
                     graLayAC = graGraphicsLayer.graphicProvider as ArrayCollection;
                 }else{
-                    if(!qFeatLayer){
+                    if(!resultGraLayer){
                         graLayAC = new ArrayCollection([]);
                     }else{
-                        graLayAC = qFeatLayer.graphicProvider as ArrayCollection;
+                        graLayAC = resultGraLayer.graphicProvider as ArrayCollection;
                     }
                 }
                 if (graLayAC.length > 0){
@@ -3326,7 +3363,7 @@
                         buffUnit = GeometryService[configBufferUnits[(cboGraBufferUnit.selectedIndex < 0)?0:cboGraBufferUnit.selectedIndex].name];
                         bufferGeometries(geomArr,sReff,[textGraInputBuffer.text],buffUnit,isGraphicalBufferOp);
                     }else{
-                        for each (var graphic2:Graphic in qFeatLayer.graphicProvider){
+                        for each (var graphic2:Graphic in resultGraLayer.graphicProvider){
                             geomArr.push(graphic2.geometry);
                         }
                         buffUnit = GeometryService[configBufferUnits[(cboBufferUnit.selectedIndex < 0)?0:cboBufferUnit.selectedIndex].name];
@@ -3461,7 +3498,7 @@
                 //todo if there are existing selection graphics and existing buffers then ask the user which to use.
                 geomArr = [];
                 var graLayBufferAC:ArrayCollection = graphicsLayerBuffer.graphicProvider as ArrayCollection;
-                var graLayAC:ArrayCollection = qFeatLayer.graphicProvider as ArrayCollection;
+                var graLayAC:ArrayCollection = resultGraLayer.graphicProvider as ArrayCollection;
                 var intersectGeom:Geometry;
                 if (graLayBufferAC.length > 0 && graLayAC.length > 0){
                     Alert.yesLabel = bufferGraphicsText;
@@ -3500,7 +3537,7 @@
             {
                 geomArr = [];
                 var graLayBufferAC:ArrayCollection = graphicsLayerBuffer.graphicProvider as ArrayCollection;
-                var graLayAC:ArrayCollection = qFeatLayer.graphicProvider as ArrayCollection;
+                var graLayAC:ArrayCollection = resultGraLayer.graphicProvider as ArrayCollection;
                 var intersectGeom:Geometry;
                 if (event.detail==Alert.YES){
                     var gra:Graphic = graLayBufferAC[0] as Graphic;
@@ -3711,13 +3748,12 @@
 
             /*
             * Create search results for the widgets results view to dispay
-            * @param Array feats the graphics that are selected in the FeatureLayer
             * @param XMLList queryFields the xml list that specifys details about the fields
             * @param Array queryRelates the array of relates for the featureLayer
             * @param String initiator the name of which view initiated this function
             * @return ArrayCollection the ArrayCollection of the formated results
             */
-            private function createSearchResults(feats:Array, queryFields:XMLList, queryRelates:Array = null, initiator:String = null, adding:Boolean = false, removing:Boolean = false):ArrayCollection
+            private function createSearchResults(queryFields:XMLList, queryRelates:Array = null, initiator:String = null):ArrayCollection
             {
                 var a:int;
                 if(qFeatLayer.layerDetails){
@@ -3733,11 +3769,16 @@
                 }
                 fldAliases = qFeatSet.fieldAliases;
                 var gSym:Symbol;
-                if(feats.length > 0 && getGraphicSymbol(feats[0], initiator)){
-                    gSym = getGraphicSymbol(feats[0], initiator);
+                if(qFeatSet.features.length > 0 && getGraphicSymbol(qFeatSet.features[0], initiator)){
+                    gSym = getGraphicSymbol(qFeatSet.features[0], initiator);
                 }
+                
+                resultGraLayer.visible = true;
+                resultGraLayer.graphicProvider = gProvider;
+                resultGraLayer.name = queryLayer.name;
+                resultGraLayer.renderer = new SimpleRenderer(gSym);
 
-                for each (var graphic:Graphic in feats){
+                for each (var graphic:Graphic in qFeatSet.features){
                     var value:String = "";
                     var title:String = "";
                     var content:String = "";
@@ -3979,24 +4020,7 @@
                         graphic.infoWindowRenderer = infoWindowRenderer;
                     }
                 }
-                if(searchResultAC){
-                    if(adding){
-                        result.addAll(searchResultAC);
-                    }
-                    if(removing){
-                        for(var r:int=0; r<result.length; r++){
-                            for(var r2:int=0; r2<searchResultAC.length; r2++){
-                                if(searchResultAC[r2].graphic == result[r].graphic){
-                                    searchResultAC.removeItemAt(r2);
-                                    break;
-                                }
-                            }
-                        }
-                        result = searchResultAC;
-                    }
-                }
                 return result;
-                
             }
 
             /*
@@ -4179,9 +4203,12 @@
             * @param String targetField the field to get the values from
             * @param * sItemVal the dropdown that will be populated
             */
-            private function popCBwithUnique(targetField:String, sItemVal:*, targetDateFormat:String, uUseUTC:Boolean):void
+            private function popCBwithUnique(targetField:String, sItemVal:*, targetDateFormat:String, uUseUTC:Boolean, startup:Boolean = false):void
             {
                 var i:int = (cboLayerText.selectedIndex < 0) ? 0 : cboLayerText.selectedIndex;
+                if(startup){
+                    i = -1;
+                }
                 if (i == -1){
                     if(configSearchText[0].layer){
                         queryLayer = configSearchText[0].layer;
@@ -4240,7 +4267,7 @@
                 if(pagingAttempts <= 4){
                     pagingQueryTask.execute();
                 }else{
-                    showMessage(PagingErrorMsg + pagingQueryTask.fieldName,false);
+                    showMessage(PagingErrorMsg + " " + pagingQueryTask.fieldName,false);
                     pagingQueryTask_complete(event);
                 }
             }
@@ -4258,7 +4285,7 @@
                 }
                 if(popCBwithUniqueQue.length > 0){
                     var arr:Object = popCBwithUniqueQue.shift();
-                    popCBwithUnique(arr.ufld, arr.sitemval, arr.udatefmt, arr.uuseutc);
+                    popCBwithUnique(arr.ufld, arr.sitemval, arr.udatefmt, arr.uuseutc, arr.startup);
                 }
                 validateSearch();
             }
@@ -4726,11 +4753,14 @@
                         setTitlebarButtonByLabel(spatialsearchLabel);
                     }
                 }
-                if(qFeatLayer){
-                    qFeatLayer.clearSelection();
-                }
+                qFeatSet = new FeatureSet();
+                gridDataProvider = null;
                 if(relqueryLayer){
                     relqueryLayer.clearSelection();
+                }
+                if (resultGraLayer)
+                {
+                    resultGraLayer.clear();
                 }
                 graphicsLayerBuffer.clear();
                 graGraphicsLayer.clear();
@@ -5532,8 +5562,8 @@
             */
             private function widgetOpenedHandler(event:Event):void
             {
-                if(qFeatLayer){
-                    qFeatLayer.visible = true;
+                if(resultGraLayer){
+                    map.addLayer(resultGraLayer);
                 }
                 if (graphicsLayerBuffer){
                     graphicsLayerBuffer.visible = true;
@@ -5541,6 +5571,14 @@
                 if (graGraphicsLayer){
                     graGraphicsLayer.visible = true;
                 }
+            }
+            
+            /*
+            * Hide the infowindow of the current search result if the search result layer is hidden
+            */
+            private function resultFeatureLayer_hideHandler(event:FlexEvent):void
+            {
+                hideInfoWindow();
             }
 
             /*
@@ -5827,9 +5865,7 @@
             private function widgetClosedHandler(event:Event):void
             {
                 setMapAction(null, null, null, null);
-                if(qFeatLayer){
-                    qFeatLayer.visible = false;
-                }
+                map.removeLayer(resultGraLayer);
                 if(graGraphicsLayer){
                     graGraphicsLayer.visible = false;
                 }
@@ -5862,14 +5898,14 @@
             */
             private function zoomAll():void
             {
-                if(qFeatLayer.selectedFeatures){
+                if(resultsFeatureSet.features.length > 0){
                     if (resultsFeatureSet.features.length == 1
                         && resultsFeatureSet.features[0].geometry.type == Geometry.MAPPOINT){
                         var mp:MapPoint = resultsFeatureSet.features[0].geometry as MapPoint;
                         map.zoom(1 / 16, mp);
                         map.centerAt(mp);
                     }else{
-                        var graphicsExtent:Extent = GraphicUtil.getGraphicsExtent(validateSelectedGeom(qFeatLayer.selectedFeatures));
+                        var graphicsExtent:Extent = GraphicUtil.getGraphicsExtent(validateSelectedGeom(resultsFeatureSet.features));
                         if(graphicsExtent){
                             if(isNaN(zoomPercent)){
                                 zoomPercent = 1.2;
@@ -5966,7 +6002,7 @@
             private function hideInfoWindow():void
             {
                 if (map.infoWindow.contentOwner &&
-                    ((map.infoWindow.contentOwner is Graphic && Graphic(map.infoWindow.contentOwner).parent === qFeatLayer) || map.infoWindow.contentOwner is Map)){
+                    ((map.infoWindow.contentOwner is Graphic && Graphic(map.infoWindow.contentOwner).parent === resultGraLayer) || map.infoWindow.contentOwner is Map)){
                     map.infoWindow.hide();
                 }
             }
@@ -6113,6 +6149,11 @@
                 mouseOverGear.play([event.target]);
             }
             
+            /*
+            * get the subselection default color line weight and alphaand apply it to the input symbol
+            * param = the original features symbology
+            * @returns Symbol
+            */
             private function modifySymboltoSubSelectDefaults(sym:Symbol):Symbol
             {
                 var retSym:Symbol;
