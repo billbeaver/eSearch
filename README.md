@@ -5,6 +5,10 @@
 [![Image of Enhanced Search Widget](https://raw.github.com/rscheitlin/eSearch/master/Preview.jpg "Example Enhanced Search Widget app")](http://gis.calhouncounty.org/FlexViewer3.1/index.html?config=config-eSearch.xml&esearch=2&slayer=3&exprnum=1)
 
 ## Version Updates
+Version 3.6.10 - 10/20/2014
+* Fixed issues with searching MultiPoint Geometry.
+* Fixed error 1009 when preforming a graphical search when the widget is initially opened.
+
 Version 3.6.9 - 9/12/2014
 * Made some big code changes that now allows the esri print service able to print the search results with the proper symbology.
 * Fixed and issue when the first layer in the xml has uniquevalsfromfield and you use a url search a bug occurred.

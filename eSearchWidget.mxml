@@ -386,8 +386,8 @@
             private var subSelAlpha:Number;
 
             //Build Constants
-            protected const VERSION:String = "3.6.9";
-            protected const BUILDDATE:String = "9/12/2014";
+            protected const VERSION:String = "3.6.10";
+            protected const BUILDDATE:String = "10/20/2014";
 
             //Resources
             [Embed(source="widgets/eSearch/assets/images/i_about.png")]
@@ -1327,6 +1327,10 @@
                                     lyrSymbol = resultMarkerSymbol;
                                     break;
                                 }
+                                case Geometry.MULTIPOINT:{
+                                    lyrSymbol = resultMarkerSymbol;
+                                    break;
+                                }
                                 case Geometry.POLYLINE:{
                                     lyrSymbol = resultLineSymbol;
                                     break;
@@ -2241,6 +2245,10 @@
                             selectedDrawingIcon = iSearchPnt;
                             break;
                         }
+                        case DrawTool.MULTIPOINT :{
+                            selectedDrawingIcon = iSearchPnt;
+                            break;
+                        }
                         case DrawTool.POLYLINE :{
                             selectedDrawingIcon = iSearchLine;
                             break;
@@ -2257,6 +2265,11 @@
                 var value:String = lastTool = selectedDrawingIcon.name;
                 switch (value){
                     case DrawTool.MAPPOINT:{
+                        status = pointLabel;
+                        drawSymbol = new SimpleMarkerSymbol(SimpleMarkerSymbol.STYLE_CIRCLE, 15, 0x3FAFDC, 1);
+                        break;
+                    }
+                    case DrawTool.MULTIPOINT:{
                         status = pointLabel;
                         drawSymbol = new SimpleMarkerSymbol(SimpleMarkerSymbol.STYLE_CIRCLE, 15, 0x3FAFDC, 1);
                         break;
@@ -3035,6 +3048,7 @@
                             
                             featLyrLen = featSet.features.length;
                             gridDataProvider = qFeatSet.attributes;
+                            resultsFeatureSet = qFeatSet;
                             
                             if(queryLayerRels && queryLayerRels.length > 0){
                                 searchResultAC = createSearchResults(token, queryLayerRels, (initiator == "graphical")?"graphical":"queryFeaturesSpatial");
@@ -3578,7 +3592,8 @@
 
                 if(graphic.geometry){
                     switch (graphic.geometry.type){
-                        case Geometry.MAPPOINT:{
+                        case Geometry.MAPPOINT:
+                        case Geometry.MULTIPOINT:{
                             if(initiator == "queryFeaturesText" || initiator == "queryFromURL"){
                                 if(configSearchText[i].symbology){
                                     sym = configSearchText[i].symbology;
@@ -3677,6 +3692,28 @@
                 
                 switch (FeatLyr.layerDetails.geometryType){
                     case Geometry.MAPPOINT:{
+                        if(initiator == "queryFeaturesText" || initiator == "queryFromURL"){
+                            if(configSearchText[i].symbology){
+                                sym = configSearchText[i].symbology;
+                            }else{
+                                sym = resultMarkerSymbol;
+                            };
+                        }else if (initiator == "graphical"){
+                            if(configSearchGraphical[i].symbology){
+                                sym = configSearchGraphical[i].symbology;
+                            }else{
+                                sym = resultMarkerSymbol;
+                            };
+                        }else{
+                            if(configSpatialSearchLayers[i].symbology){
+                                sym = configSpatialSearchLayers[i].symbology;
+                            }else{
+                                sym = resultMarkerSymbol;
+                            };
+                        }
+                        break;
+                    }
+                    case Geometry.MULTIPOINT:{
                         if(initiator == "queryFeaturesText" || initiator == "queryFromURL"){
                             if(configSearchText[i].symbology){
                                 sym = configSearchText[i].symbology;
@@ -4497,6 +4534,11 @@
                 switch (gra.geometry.type){
                     case Geometry.MAPPOINT:{
                         pt = gra.geometry as MapPoint;
+                        break;
+                    }
+                    case Geometry.MULTIPOINT:{
+                        var mp:Multipoint = gra.geometry as Multipoint;
+                        pt = mp.extent.center;
                         break;
                     }
                     case Geometry.POLYLINE:{
@@ -6193,7 +6235,7 @@
                 
                 var gSym:Symbol;
                 if(searchResultAC.length > 0){
-                    gSym = getGraphicSymbol(searchResultAC[0].graphic, searchResultAC[0].initiator);
+                    gSym = getGraphicSymbol(searchResultAC[0].graphic, searchResultAC[0].initiator).clone();
                 }
                 
                 //reset selected records symbols
@@ -6216,6 +6258,7 @@
                     
                     var gra:Graphic = searchResult.graphic;
                     
+                    
                     if (!gra.geometry){
                         return;
                     }
@@ -6223,19 +6266,21 @@
                     switch(gra.geometry.type){
                         case "esriGeometryPoint":
                         case "esriGeometryMultipoint":{
+                            gra.symbol = searchResult.symbol = gSym;
                             gra.filters = [new GlowFilter(subSelColor, 0.8, 4, 4, subSelWidth)]
                             break;
                         }
                         case "esriGeometryEnvelope":
                         case "esriGeometryPolygon":{
-                            gra.symbol = searchResult.symbol = modifySymboltoSubSelectDefaults(gra.symbol);
+                            gra.symbol = searchResult.symbol = modifySymboltoSubSelectDefaults(gra.symbol).clone();
                             break;
                         }
                         case "esriGeometryPolyline":{
-                            gra.symbol = searchResult.symbol = modifySymboltoSubSelectDefaults(gra.symbol);
+                            gra.symbol = searchResult.symbol = modifySymboltoSubSelectDefaults(gra.symbol).clone();
                             break;
                         }
                     }
+                    gra.graphicsLayer.refresh();
                 }
                 
                 function findSearchResultByOID(oid:Number):SearchResult
