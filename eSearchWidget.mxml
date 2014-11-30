@@ -386,8 +386,8 @@
             private var subSelAlpha:Number;
 
             //Build Constants
-            protected const VERSION:String = "3.6.10";
-            protected const BUILDDATE:String = "10/20/2014";
+            protected const VERSION:String = "3.7";
+            protected const BUILDDATE:String = "11/29/2014";
 
             //Resources
             [Embed(source="widgets/eSearch/assets/images/i_about.png")]
@@ -406,7 +406,22 @@
             {
                 var fLayer:FeatureLayer = new FeatureLayer;
                 sWidget = this;
-                WIDGET_URL = config.substring(0,config.lastIndexOf("/")) + "/assets/images/";
+                var r:int;
+                var i:int;
+                var j:int;
+                var l:int;
+                var v:int;
+                for (i = 0; i < this.configData.widgets.length; i++){
+                    var mainConfigWidget:Object = this.configData.widgets[i];
+                    var swfName:String = "/" + this.className + ".swf";
+                    if (mainConfigWidget.url) {
+                        var widgetUrl:String = mainConfigWidget.url as String;
+                        if (widgetUrl.indexOf(swfName)>=0){
+                            WIDGET_URL = widgetUrl.substring(0,widgetUrl.length-swfName.length) + "/assets/images/";
+                        }
+                    }
+                }
+                //WIDGET_URL = config.substring(0,config.lastIndexOf("/")) + "/assets/images/";
                 
                 resultGraLayer = new GraphicsLayer();
                 resultGraLayer.visible = false;
@@ -678,11 +693,7 @@
                     configSearchText = [];
                     configSpatialSearchLayers = [];
                     configDomainVals = [];
-                    var r:Number;
-                    var i:Number;
-                    var j:Number;
-                    var l:Number;
-                    var v:Number;
+                    
                     var lyrList:XMLList = configXML..layer;
                     for (i = 0; i < lyrList.length(); i++){
                         configLayerExprs = [];
@@ -2035,7 +2046,7 @@
                     }
                 }
                 var v:int;
-                var i:Number = (cboLayerText.selectedIndex < 0) ? 0 : cboLayerText.selectedIndex;
+                var i:int = (cboLayerText.selectedIndex < 0) ? 0 : cboLayerText.selectedIndex;
                 cboLayerGraphical.selectedItem = cboLayerText.selectedItem;
                 var sItemVal:SearchExpValueItem;
                 for(v=0; v<configSearchText[i].expr[0].values.length; v++){
@@ -2126,8 +2137,8 @@
             */
             private function searchLayerExprChangedText():void
             {
-                var i:Number = (cboLayerText.selectedIndex < 0) ? 0 : cboLayerText.selectedIndex;
-                var j:Number = (cboLayerExpr.selectedIndex < 0) ? 0 : cboLayerExpr.selectedIndex;
+                var i:int = (cboLayerText.selectedIndex < 0) ? 0 : cboLayerText.selectedIndex;
+                var j:int = (cboLayerExpr.selectedIndex < 0) ? 0 : cboLayerExpr.selectedIndex;
                 if(searchGroup.numElements > 1){
                     for(var sgi:Number = searchGroup.numElements - 1; sgi >= 1; sgi--){
                         searchGroup.removeElementAt(sgi);
@@ -4337,7 +4348,7 @@
                 configUserVals = [];
                 var uArray:Array;
                 //If the userlist values are text qualified (because of a value with a comma) then split based
-                //in the qualifier with is a single qoute.
+                //on the qualifier wrapped with a single qoute.
                 if (userList.indexOf("','") > -1)
                 {
                     uArray = mx.utils.StringUtil.trimArrayElements(userList,"','").split("','");
