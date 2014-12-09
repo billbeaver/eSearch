@@ -386,8 +386,8 @@
             private var subSelAlpha:Number;
 
             //Build Constants
-            protected const VERSION:String = "3.7";
-            protected const BUILDDATE:String = "11/29/2014";
+            protected const VERSION:String = "3.7.1";
+            protected const BUILDDATE:String = "12/8/2014";
 
             //Resources
             [Embed(source="widgets/eSearch/assets/images/i_about.png")]
@@ -1605,6 +1605,7 @@
                                 gridFields.push(str);
                             }
                         }
+                        
                         if (fieldXML.@hyperlinkgridfield[0]){
                             if (fieldXML.@hyperlinkgridfield[0]=="true"){
                                 fldOrder++;

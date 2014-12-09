@@ -5,6 +5,9 @@
 [![Image of Enhanced Search Widget](https://raw.github.com/rscheitlin/eSearch/master/Preview.jpg "Example Enhanced Search Widget app")](http://gis.calhouncounty.org/FlexViewer3.1/index.html?config=config-eSearch.xml&esearch=2&slayer=3&exprnum=1)
 
 ## Version Updates
+Version 3.7.1 - 12/8/2014
+* Fixed issue with data grids if compiling with Apache Flex 4.13 SDK
+
 Version 3.7 - 10/29/2014
 * Recompiled for Flex Viewer 3.7
 * Assets folder is now searched for based on the location of the compiled widget and not the configuration file.
