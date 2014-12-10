@@ -142,24 +142,6 @@ declarations define DataGrid skin parts except <code>headerColumnSeparator</code
             </s:Line>
         </fx:Component>
         
-        <!--- 
-        Defines the appearance of the drop indicator.
-        The DataGrid's layout takes care to size and position the dropIndicator.
-        -->
-        <fx:Component id="dropIndicator">
-            <s:Group>
-                <s:Rect left="0" right="0" top="0" bottom="0">
-                    <s:fill>
-                        <!--- Defines the color of the background. -->
-                        <s:SolidColor color="0xBBBBBB" />
-                    </s:fill>
-                    <s:stroke>
-                        <s:SolidColorStroke color="0x868686" weight="1"/>
-                    </s:stroke>
-                </s:Rect>
-            </s:Group>
-        </fx:Component>
-        
         <!--- Defines the value of the columnSeparator property for the columnHeaderGroup. -->
         <fx:Component id="headerColumnSeparator">
             <s:Line>
@@ -363,17 +345,11 @@ declarations define DataGrid skin parts except <code>headerColumnSeparator</code
                 <s:Scroller id="scroller" minViewportInset="1" hasFocusableChildren="false" height="100%">
                     <!--- @private -->
                     <s:Grid id="grid" itemRenderer="spark.skins.spark.DefaultGridItemRenderer">
-                        <s:gridView>
-                            <fx:Component>
-                                <s:GridView>
-                                    <s:GridLayer name="backgroundLayer"/>
-                                    <s:GridLayer name="selectionLayer"/>
-                                    <s:GridLayer name="editorIndicatorLayer"/>                            
-                                    <s:GridLayer name="rendererLayer"/>
-                                    <s:GridLayer name="overlayLayer"/>
-                                </s:GridView>
-                            </fx:Component>
-                        </s:gridView>
+                        <s:GridLayer name="backgroundLayer"/>
+                        <s:GridLayer name="selectionLayer"/>
+                        <s:GridLayer name="editorIndicatorLayer"/>                            
+                        <s:GridLayer name="rendererLayer"/>
+                        <s:GridLayer name="overlayLayer"/>
                     </s:Grid>                    
                 </s:Scroller>
             </s:VGroup>
