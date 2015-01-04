@@ -5,6 +5,9 @@
 [![Image of Enhanced Search Widget](https://raw.github.com/rscheitlin/eSearch/master/Preview.jpg "Example Enhanced Search Widget app")](http://gis.calhouncounty.org/FlexViewer3.1/index.html?config=config-eSearch.xml&esearch=2&slayer=3&exprnum=1)
 
 ## Version Updates
+Version 3.7.3 - Jan 4, 2015
+* Fixed bug with switching search layer drop down would sometimes produce and error depending on expression and layer configuration.
+
 Version 3.7.2 - Dec 10, 2014
 * (lets try this again) Fixed issue with data grids if compiling with any SDK less than Apache Flex 4.13 SDK (do not compile with 4.13 SDK)
 
