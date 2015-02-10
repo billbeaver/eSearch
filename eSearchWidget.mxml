@@ -386,8 +386,8 @@
             private var subSelAlpha:Number;
 
             //Build Constants
-            protected const VERSION:String = "3.7.3";
-            protected const BUILDDATE:String = "1/4/2015";
+            protected const VERSION:String = "3.7.4";
+            protected const BUILDDATE:String = "2/10/2015";
 
             //Resources
             [Embed(source="widgets/eSearch/assets/images/i_about.png")]
@@ -4550,7 +4550,11 @@
                     }
                     case Geometry.MULTIPOINT:{
                         var mp:Multipoint = gra.geometry as Multipoint;
-                        pt = mp.extent.center;
+                        if (mp.extent){
+                            pt = mp.extent.center;
+                        }else{
+                            pt = mp.getPoint(0);
+                        }
                         break;
                     }
                     case Geometry.POLYLINE:{
@@ -5519,7 +5523,7 @@
                             map.centerAt(searchResult.point);
                         }
                     }else{
-                        if(isNaN(zoomScale)){
+                        if(isNaN(zoomScale) && searchResult.graphic.geometry.extent){
                             map.zoomTo(searchResult.graphic.geometry.extent.expand(zoomPercent));
                         }else{
                             if (map.scale > zoomScale){
